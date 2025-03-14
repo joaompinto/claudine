@@ -20,7 +20,8 @@ class Agent:
                 max_rounds: int = 30, instructions: Optional[str] = None,
                 tools: Optional[List[Callable]] = None,
                 tool_interceptors: Optional[Tuple[Optional[Callable], Optional[Callable]]] = None,
-                disable_parallel_tool_use: bool = True):
+                disable_parallel_tool_use: bool = True,
+                text_editor: Optional[Callable] = None):
         """
         Initialize the Agent wrapper with your Anthropic API key, model parameters, and tools.
         If api_key is not provided, it will use the ANTHROPIC_API_KEY environment variable.
@@ -34,6 +35,7 @@ class Agent:
             tools: List of functions to register as tools
             tool_interceptors: Tuple of (pre_interceptor, post_interceptor) callables for tool execution
             disable_parallel_tool_use: Disable parallel tool use to ensure accurate token accounting
+            text_editor: Callable function to handle text editor tool requests
         """
         # Initialize API client
         self.api_client = ApiClient(api_key=api_key)
@@ -54,6 +56,10 @@ class Agent:
         # Register tools if provided
         if tools:
             self.tool_manager.register_tools(tools)
+        
+        # Register text editor if provided
+        if text_editor:
+            self.tool_manager.register_text_editor(text_editor)
         
         # Set tool interceptors if provided
         if tool_interceptors:

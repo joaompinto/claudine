@@ -62,6 +62,40 @@ response = agent.process_prompt("What's the weather in London?")
 print(response)
 ```
 
+## Text Editor Tool
+
+Claudine supports Claude's text editor tool for code editing and file manipulation:
+
+```python
+from claudine import Agent
+
+def handle_editor_tool(**kwargs):
+    """Handle text editor tool requests from Claude."""
+    cmd_name = kwargs.get("command")
+    
+    # Handle different commands (view, edit, etc.)
+    if cmd_name == "view":
+        path = kwargs.get("path")
+        # Implement file viewing logic
+        return "File content here"
+    elif cmd_name == "edit":
+        # Implement file editing logic
+        return "File edited successfully"
+    
+    return str(kwargs)
+
+# Initialize agent with text editor tool
+agent = Agent(
+    text_editor=handle_editor_tool
+)
+
+# Process a prompt that might use the text editor
+response = agent.process_prompt("Fix the bug in file.py")
+print(response)
+```
+
+The text editor tool supports various commands like `view`, `edit`, and others that Claude may use to interact with your codebase.
+
 ## Token Tracking
 
 Claudine provides detailed token usage information:

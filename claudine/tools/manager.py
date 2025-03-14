@@ -16,6 +16,7 @@ class ToolManager:
         self.tools = {}
         self.pre_interceptor = None
         self.post_interceptor = None
+        self.text_editor = None
     
     def register_tool(self, func: Callable, name: Optional[str] = None, 
                      description: Optional[str] = None) -> str:
@@ -49,6 +50,18 @@ class ToolManager:
         for tool in tools:
             self.register_tool(tool)
     
+    def register_text_editor(self, text_editor: Callable):
+        """
+        Register a text editor function to handle text editor tool requests.
+        
+        Args:
+            text_editor: Function to handle text editor tool requests
+        """
+        self.text_editor = text_editor
+        
+        # Store the text editor function without generating a schema
+        self.tools["str_replace_editor"] = text_editor
+    
     def set_tool_interceptors(self, pre_interceptor: Optional[Callable] = None, 
                              post_interceptor: Optional[Callable] = None):
         """
@@ -71,8 +84,16 @@ class ToolManager:
         schemas = []
         
         for name, func in self.tools.items():
-            schema = generate_tool_schema(func, name)
-            schemas.append(schema)
+            # Special handling for text editor tool
+            if name == "str_replace_editor" and self.text_editor:
+                # For text editor, only include name and type
+                schemas.append({
+                    "name": "str_replace_editor",
+                    "type": "text_editor_20250124"
+                })
+            else:
+                schema = generate_tool_schema(func, name)
+                schemas.append(schema)
         
         return schemas
     
@@ -87,8 +108,12 @@ class ToolManager:
         Returns:
             Tool execution result as a string
         """
-        # Get the tool function
-        tool_func = self.tools.get(tool_name)
+        # Check if this is a text editor tool request
+        if tool_name == "str_replace_editor" and self.text_editor:
+            tool_func = self.text_editor
+        else:
+            # Get the tool function
+            tool_func = self.tools.get(tool_name)
         
         if not tool_func:
             return f"Error: Tool '{tool_name}' not found"
