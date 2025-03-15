@@ -26,6 +26,11 @@ if ! command -v uv &> /dev/null; then
     print_error "uv is not installed. Please install it first."
 fi
 
+# Check if twine is installed
+if ! command -v twine &> /dev/null; then
+    print_error "twine is not installed. Please install it first."
+fi
+
 # Get version from pyproject.toml
 if [ ! -f "pyproject.toml" ]; then
     print_error "pyproject.toml not found. Are you running this from the project root?"
@@ -49,6 +54,13 @@ else
     
     if [ "$PROJECT_VERSION" != "$CURRENT_TAG_VERSION" ]; then
         print_error "Version mismatch: pyproject.toml ($PROJECT_VERSION) != git tag ($CURRENT_TAG_VERSION)"
+    fi
+    
+    # Check if the tag points to the current commit
+    CURRENT_COMMIT=$(git rev-parse HEAD)
+    TAG_COMMIT=$(git rev-parse "$CURRENT_TAG")
+    if [ "$CURRENT_COMMIT" != "$TAG_COMMIT" ]; then
+        print_error "Tag $CURRENT_TAG does not point to the current commit. Please update the tag or create a new one."
     fi
 fi
 
@@ -79,7 +91,8 @@ uv build .
 
 # Publish to PyPI
 print_info "Publishing to PyPI..."
-uv publish dist/*
+# Using twine instead of uv publish since uv publish is experimental
+twine upload dist/*
 
 # Create a new git tag if one doesn't exist for this version
 if [ -z "$CURRENT_TAG" ] || [ "$CURRENT_TAG_VERSION" != "$PROJECT_VERSION" ]; then
