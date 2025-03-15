@@ -1,5 +1,10 @@
+"""
+Token tracking functionality for Claude.
+Provides tools for tracking token usage and calculating costs across
+conversations, including separate tracking for text and tool interactions.
+"""
 from typing import Dict, List, Optional, Union
-from .api.models import TokenUsage, TokenUsageInfo, ModelPricing, TokenPricing
+from .api.models import TokenUsage, TokenUsageInfo, ModelPricing, TokenPricing, TokenCost
 
 # Default model to use for pricing
 DEFAULT_MODEL = "claude-3-7-sonnet-20250219"
@@ -118,7 +123,7 @@ class TokenTracker:
             by_tool=by_tool_usage
         )
     
-    def get_cost(self, message_id: Optional[str] = None) -> Dict:
+    def get_cost(self, message_id: Optional[str] = None) -> TokenCost:
         """
         Get cost information for token usage.
         
@@ -127,7 +132,7 @@ class TokenTracker:
                         If None, returns consolidated cost information.
         
         Returns:
-            Dictionary with cost information
+            TokenCost object with cost information
         """
         # Get token usage
         usage = self.get_token_usage(message_id)
@@ -135,23 +140,30 @@ class TokenTracker:
         # Get pricing for the default model
         pricing = MODEL_PRICING.get(DEFAULT_MODEL)
         if not pricing:
-            return {"error": f"No pricing information available for model {DEFAULT_MODEL}"}
+            return TokenCost(
+                input_cost=0.0,
+                output_cost=0.0,
+                unit="USD"
+            )
         
         # If it's a single message, calculate cost for that message
         if isinstance(usage, dict):
             input_cost = pricing.input_tokens.calculate_cost(usage.get("input_tokens", 0))
             output_cost = pricing.output_tokens.calculate_cost(usage.get("output_tokens", 0))
-            total_cost = input_cost + output_cost
             
-            return {
-                "input_cost": input_cost,
-                "output_cost": output_cost,
-                "total_cost": total_cost,
-                "unit": pricing.input_tokens.unit
-            }
+            return TokenCost(
+                input_cost=input_cost,
+                output_cost=output_cost,
+                unit=pricing.input_tokens.unit
+            )
         
-        # Calculate cost for consolidated usage
-        return usage.calculate_cost(pricing)
+        # For consolidated usage, extract the total cost from the cost dictionary
+        cost_dict = usage.calculate_cost(pricing)
+        return TokenCost(
+            input_cost=cost_dict["total_cost"].input_cost,
+            output_cost=cost_dict["total_cost"].output_cost,
+            unit=cost_dict["total_cost"].unit
+        )
     
     def reset(self):
         """Reset all token usage data."""

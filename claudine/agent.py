@@ -1,5 +1,7 @@
 """
 Main Agent class for Claudine.
+Provides a high-level interface for interacting with Claude models,
+with support for tool use, token tracking, and conversation management.
 """
 from typing import Dict, List, Optional, Callable, Any, Tuple, Union
 import anthropic
@@ -21,7 +23,8 @@ class Agent:
                 tools: Optional[List[Callable]] = None,
                 tool_interceptors: Optional[Tuple[Optional[Callable], Optional[Callable]]] = None,
                 disable_parallel_tool_use: bool = True,
-                text_editor: Optional[Callable] = None):
+                text_editor_tool: Optional[Callable] = None,
+                debug_mode: bool = False):
         """
         Initialize the Agent wrapper with your Anthropic API key, model parameters, and tools.
         If api_key is not provided, it will use the ANTHROPIC_API_KEY environment variable.
@@ -35,10 +38,13 @@ class Agent:
             tools: List of functions to register as tools
             tool_interceptors: Tuple of (pre_interceptor, post_interceptor) callables for tool execution
             disable_parallel_tool_use: Disable parallel tool use to ensure accurate token accounting
-            text_editor: Callable function to handle text editor tool requests
+            text_editor_tool: Callable function to handle text editor tool requests. Must implement the
+                         commands and response formats as specified in the Anthropic documentation:
+                         https://docs.anthropic.com/en/docs/build-with-claude/tool-use/text-editor-tool
+            debug_mode: If True, print debug information about API calls
         """
         # Initialize API client
-        self.api_client = ApiClient(api_key=api_key)
+        self.api_client = ApiClient(api_key=api_key, debug_mode=debug_mode)
         
         # Store parameters
         self.messages = []
@@ -57,9 +63,10 @@ class Agent:
         if tools:
             self.tool_manager.register_tools(tools)
         
-        # Register text editor if provided
-        if text_editor:
-            self.tool_manager.register_text_editor(text_editor)
+        # Register text editor tool if provided
+        if text_editor_tool:
+            self.tool_manager.tools["str_replace_editor"] = text_editor_tool
+            self.tool_manager.text_editor_tool = text_editor_tool
         
         # Set tool interceptors if provided
         if tool_interceptors:

@@ -88,30 +88,19 @@ def main():
     
     print("\n" + "-" * 50 + "\n")
     print("Cost Information:")
-    print(f"Text input cost: ${cost_info['text_cost'].input_cost:.6f} {cost_info['text_cost'].unit}")
-    print(f"Text output cost: ${cost_info['text_cost'].output_cost:.6f} {cost_info['text_cost'].unit}")
-    print(f"Text total cost: ${cost_info['text_cost'].total_cost:.6f} {cost_info['text_cost'].unit}")
-    print(f"Tool input cost: ${cost_info['tools_cost'].input_cost:.6f} {cost_info['tools_cost'].unit}")
-    print(f"Tool output cost: ${cost_info['tools_cost'].output_cost:.6f} {cost_info['tools_cost'].unit}")
-    print(f"Tool total cost: ${cost_info['tools_cost'].total_cost:.6f} {cost_info['tools_cost'].unit}")
-    print(f"Total cost: ${cost_info['total_cost'].total_cost:.6f} {cost_info['total_cost'].unit}")
+    print(f"Input cost: {cost_info.format_input_cost()} {cost_info.unit}")
+    print(f"Output cost: {cost_info.format_output_cost()} {cost_info.unit}")
+    print(f"Total cost: {cost_info.format_total_cost()} {cost_info.unit}")
     
     # Print token usage by tool
     print("\n" + "-" * 50 + "\n")
-    print("Token Usage By Tool:")
+    print("Token Usage by Tool:")
     for tool_name, usage in token_info.by_tool.items():
-        print(f"Tool: {tool_name}")
+        print(f"\nTool: {tool_name}")
         print(f"  Input tokens: {usage.input_tokens}")
         print(f"  Output tokens: {usage.output_tokens}")
         print(f"  Total tokens: {usage.total_tokens}")
         
-        # Get cost for this tool
-        tool_cost = cost_info['by_tool'].get(tool_name)
-        if tool_cost:
-            print(f"  Input cost: ${tool_cost.input_cost:.6f} {tool_cost.unit}")
-            print(f"  Output cost: ${tool_cost.output_cost:.6f} {tool_cost.unit}")
-            print(f"  Total cost: ${tool_cost.total_cost:.6f} {tool_cost.unit}")
-    
     return 0
 
 if __name__ == "__main__":

@@ -30,9 +30,9 @@ def main():
     cost_info = agent.get_cost()
     
     print("\nCost Information:")
-    print(f"Input cost: ${cost_info['text_cost'].input_cost:.6f} {cost_info['text_cost'].unit}")
-    print(f"Output cost: ${cost_info['text_cost'].output_cost:.6f} {cost_info['text_cost'].unit}")
-    print(f"Total cost: ${cost_info['total_cost'].total_cost:.6f} {cost_info['total_cost'].unit}")
+    print(f"Input cost: {cost_info.format_input_cost()}")
+    print(f"Output cost: {cost_info.format_output_cost()}")
+    print(f"Total cost: {cost_info.format_total_cost()}")
     
     return 0
 

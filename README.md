@@ -64,37 +64,25 @@ print(response)
 
 ## Text Editor Tool
 
-Claudine supports Claude's text editor tool for code editing and file manipulation:
+Claudine supports the text editor tool for Claude, allowing it to view and edit text files:
 
 ```python
-from claudine import Agent
+def handle_editor_tool(command, **kwargs):
+    # Implement the text editor tool
+    # ...
 
-def handle_editor_tool(**kwargs):
-    """Handle text editor tool requests from Claude."""
-    cmd_name = kwargs.get("command")
-    
-    # Handle different commands (view, edit, etc.)
-    if cmd_name == "view":
-        path = kwargs.get("path")
-        # Implement file viewing logic
-        return "File content here"
-    elif cmd_name == "edit":
-        # Implement file editing logic
-        return "File edited successfully"
-    
-    return str(kwargs)
-
-# Initialize agent with text editor tool
-agent = Agent(
-    text_editor=handle_editor_tool
-)
-
-# Process a prompt that might use the text editor
-response = agent.process_prompt("Fix the bug in file.py")
-print(response)
+# Initialize the agent with the text editor tool
+agent = Agent(text_editor_tool=handle_editor_tool)
 ```
 
-The text editor tool supports various commands like `view`, `edit`, and others that Claude may use to interact with your codebase.
+The text editor tool supports the following commands:
+- `view`: View the contents of a file
+- `str_replace`: Replace text in a file
+- `create`: Create a new file
+- `insert`: Insert text at a specific position
+- `undo_edit`: Undo the last edit
+
+For more information, see the [Anthropic documentation](https://docs.anthropic.com/en/docs/build-with-claude/tool-use/text-editor-tool).
 
 ## Token Tracking
 
@@ -114,6 +102,25 @@ print(f"Tool output tokens: {token_info.tools_usage.output_tokens}")
 # Total usage
 print(f"Total tokens: {token_info.total_usage.total_tokens}")
 ```
+
+## Debugging
+
+Claudine provides a debug mode to help you understand what's happening behind the scenes:
+
+```python
+# Initialize agent with debug mode
+agent = Agent(debug_mode=True)
+
+# Process a prompt
+response = agent.process_prompt("Hello, Claude!")
+```
+
+When debug mode is enabled, Claudine will print detailed information about the API requests being sent to Claude, including:
+- Message content
+- Tool definitions
+- Model parameters
+
+This is particularly useful when debugging tool use and text editor interactions.
 
 ## Cost Tracking
 

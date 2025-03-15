@@ -81,6 +81,27 @@ class TokenCost:
     def total_cost(self) -> float:
         """Calculate total cost from input and output costs"""
         return self.input_cost + self.output_cost
+    
+    def format_input_cost(self) -> str:
+        """Format input cost in dollars or cents based on value"""
+        # Unicode cent symbol (requires UTF-8 terminal)
+        if self.input_cost < 1.0:
+            return f"{self.input_cost * 100:.2f}¢"
+        return f"${self.input_cost:.6f}"
+    
+    def format_output_cost(self) -> str:
+        """Format output cost in dollars or cents based on value"""
+        # Unicode cent symbol (requires UTF-8 terminal)
+        if self.output_cost < 1.0:
+            return f"{self.output_cost * 100:.2f}¢"
+        return f"${self.output_cost:.6f}"
+    
+    def format_total_cost(self) -> str:
+        """Format total cost in dollars or cents based on value"""
+        # Unicode cent symbol (requires UTF-8 terminal)
+        if self.total_cost < 1.0:
+            return f"{self.total_cost * 100:.2f}¢"
+        return f"${self.total_cost:.6f}"
 
 @dataclass
 class TokenUsageInfo:

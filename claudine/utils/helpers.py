@@ -1,7 +1,7 @@
 """
 Common utility functions for Claudine.
 """
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Union, Tuple
 import uuid
 import json
 
@@ -32,19 +32,28 @@ def extract_text_content(content_blocks: List[Any]) -> str:
     
     return text_content
 
-def format_tool_result(tool_use_id: str, result: str) -> Dict:
+def format_tool_result(tool_use_id: str, result: Union[str, Tuple[str, bool]]) -> Dict:
     """
     Format a tool result for sending to Claude.
     
     Args:
         tool_use_id: ID of the tool use
-        result: Result of the tool execution
+        result: Result of the tool execution, either a string or a tuple of (content, is_error)
         
     Returns:
         Formatted tool result
     """
-    return {
-        "type": "tool_result",
-        "tool_use_id": tool_use_id,
-        "content": result
-    }
+    if isinstance(result, tuple) and len(result) == 2 and isinstance(result[1], bool):
+        content, is_error = result
+        return {
+            "type": "tool_result",
+            "tool_use_id": tool_use_id,
+            "content": content,
+            "is_error": is_error
+        }
+    else:
+        return {
+            "type": "tool_result",
+            "tool_use_id": tool_use_id,
+            "content": result
+        }

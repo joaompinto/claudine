@@ -31,7 +31,8 @@ def main():
         api_key=api_key,
         max_tokens=1024,
         temperature=0.7,
-        text_editor=handle_editor_tool
+        text_editor_tool=handle_editor_tool,
+        debug_mode=True  # Enable debug mode to see messages sent to Claude
     )
     
     # Example prompt that might trigger the text editor tool
@@ -45,7 +46,7 @@ def main():
     cost_info = agent.get_cost()
     
     print("\nToken Usage and Cost Information:")
-    print(f"Total cost: {cost_info['total_cost']}")
+    print(f"Total cost: {cost_info.format_total_cost()}")
     print(f"Total input tokens: {token_usage.total_usage.input_tokens}")
     print(f"Total output tokens: {token_usage.total_usage.output_tokens}")
     print(f"Text input tokens: {token_usage.text_usage.input_tokens}")

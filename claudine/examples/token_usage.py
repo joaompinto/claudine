@@ -37,13 +37,9 @@ def main():
     cost_info = agent.get_cost()
     
     print("\nCost Information:")
-    print(f"Text input cost: ${cost_info['text_cost'].input_cost:.6f} {cost_info['text_cost'].unit}")
-    print(f"Text output cost: ${cost_info['text_cost'].output_cost:.6f} {cost_info['text_cost'].unit}")
-    print(f"Text total cost: ${cost_info['text_cost'].total_cost:.6f} {cost_info['text_cost'].unit}")
-    print(f"Tool input cost: ${cost_info['tools_cost'].input_cost:.6f} {cost_info['tools_cost'].unit}")
-    print(f"Tool output cost: ${cost_info['tools_cost'].output_cost:.6f} {cost_info['tools_cost'].unit}")
-    print(f"Tool total cost: ${cost_info['tools_cost'].total_cost:.6f} {cost_info['tools_cost'].unit}")
-    print(f"Total cost: ${cost_info['total_cost'].total_cost:.6f} {cost_info['total_cost'].unit}")
+    print(f"Input cost: {cost_info.format_input_cost()} {cost_info.unit}")
+    print(f"Output cost: {cost_info.format_output_cost()} {cost_info.unit}")
+    print(f"Total cost: {cost_info.format_total_cost()} {cost_info.unit}")
     
     # Example with a longer prompt
     print("\n" + "-" * 50 + "\n")
@@ -68,7 +64,7 @@ def main():
     cost_info = agent.get_cost()
     
     print("\nUpdated Cost Information:")
-    print(f"Total cost: ${cost_info['total_cost'].total_cost:.6f} {cost_info['total_cost'].unit}")
+    print(f"Total cost: {cost_info.format_total_cost()} {cost_info.unit}")
     
     return 0
 
