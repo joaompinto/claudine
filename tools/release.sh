@@ -59,7 +59,7 @@ fi
 
 # Check PyPI for existing version
 print_info "Checking if version $PROJECT_VERSION already exists on PyPI..."
-if curl -s "https://pypi.org/pypi/claudine/$PROJECT_VERSION/json" > /dev/null 2>&1; then
+if curl -f -s "https://pypi.org/pypi/claudine/$PROJECT_VERSION/json" > /dev/null 2>&1; then
     print_error "Version $PROJECT_VERSION already exists on PyPI. Please update the version in pyproject.toml."
 fi
 
