@@ -5,11 +5,8 @@ A Python wrapper for the Anthropic Claude API that simplifies tool use, token tr
 ## 📦 Installation
 
 ```bash
-# Using uv
-uv pip install -e .
-
-# With development dependencies
-uv pip install -e ".[dev]"
+# Using pip
+pip install claudine
 ```
 
 ## ✨ Features

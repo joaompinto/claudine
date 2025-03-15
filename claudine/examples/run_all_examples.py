@@ -8,12 +8,12 @@ import sys
 from pathlib import Path
 
 def run_example(example_path):
-    """Run a single example file using uv and return its exit code."""
+    """Run a single example file using python and return its exit code."""
     print(f"\n{'=' * 80}")
     print(f"Running example: {example_path.name}")
     print(f"{'=' * 80}")
     
-    result = subprocess.run(["uv", "run", str(example_path)], capture_output=False)
+    result = subprocess.run([sys.executable, str(example_path)], capture_output=False)
     
     print(f"\nExit code: {result.returncode}")
     if result.returncode != 0:
