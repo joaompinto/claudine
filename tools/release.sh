@@ -75,11 +75,11 @@ fi
 
 # Build the package
 print_info "Building package..."
-uv pip build .
+uv build .
 
 # Publish to PyPI
 print_info "Publishing to PyPI..."
-uv pip publish dist/*
+uv publish dist/*
 
 # Create a new git tag if one doesn't exist for this version
 if [ -z "$CURRENT_TAG" ] || [ "$CURRENT_TAG_VERSION" != "$PROJECT_VERSION" ]; then
