@@ -41,7 +41,7 @@ print_info "Project version from pyproject.toml: $PROJECT_VERSION"
 # Get current git tag
 CURRENT_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
 if [ -z "$CURRENT_TAG" ]; then
-    print_warning "No git tags found. If this is the first release, you may want to create a tag."
+    print_error "No git tags found. Please create a tag before releasing."
 else
     # Remove 'v' prefix if present
     CURRENT_TAG_VERSION=${CURRENT_TAG#v}
