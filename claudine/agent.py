@@ -11,6 +11,7 @@ from .api.models import ResponseType, ToolUseResponse, TextResponse, TokenUsage,
 from .tools.manager import ToolManager
 from .token_tracking import TokenTracker, DEFAULT_MODEL
 from .utils.helpers import generate_message_id, extract_text_content, format_tool_result
+from .exceptions import MaxTokensExceededException, MaxRoundsExceededException
 
 class Agent:
     """
@@ -21,7 +22,7 @@ class Agent:
                 max_tokens: int = 1024, temperature: float = 0.7,
                 max_rounds: int = 30, instructions: Optional[str] = None,
                 tools: Optional[List[Callable]] = None,
-                tool_interceptors: Optional[Tuple[Optional[Callable], Optional[Callable]]] = None,
+                tool_callbacks: Optional[Tuple[Optional[Callable], Optional[Callable]]] = None,
                 disable_parallel_tool_use: bool = True,
                 text_editor_tool: Optional[Callable] = None,
                 debug_mode: bool = False):
@@ -36,7 +37,7 @@ class Agent:
             max_rounds: Maximum number of rounds for tool use
             instructions: Instructions to guide the model's behavior (used as system prompt)
             tools: List of functions to register as tools
-            tool_interceptors: Tuple of (pre_interceptor, post_interceptor) callables for tool execution
+            tool_callbacks: Tuple of (pre_callback, post_callback) callables for tool execution
             disable_parallel_tool_use: Disable parallel tool use to ensure accurate token accounting
             text_editor_tool: Callable function to handle text editor tool requests. Must implement the
                          commands and response formats as specified in the Anthropic documentation:
@@ -68,24 +69,24 @@ class Agent:
             self.tool_manager.tools["str_replace_editor"] = text_editor_tool
             self.tool_manager.text_editor_tool = text_editor_tool
         
-        # Set tool interceptors if provided
-        if tool_interceptors:
-            pre_interceptor, post_interceptor = tool_interceptors
-            self.tool_manager.set_tool_interceptors(pre_interceptor, post_interceptor)
+        # Set tool callbacks if provided
+        if tool_callbacks:
+            pre_callback, post_callback = tool_callbacks
+            self.tool_manager.set_tool_callbacks(pre_callback, post_callback)
         
         # Disable parallel tool use to ensure accurate token accounting
         self.disable_parallel_tool_use = disable_parallel_tool_use
     
-    def set_tool_interceptors(self, pre_interceptor: Optional[Callable] = None, 
-                            post_interceptor: Optional[Callable] = None):
+    def set_tool_callbacks(self, pre_callback: Optional[Callable] = None, 
+                            post_callback: Optional[Callable] = None):
         """
-        Set interceptors for tool execution.
+        Set callbacks for tool execution.
         
         Args:
-            pre_interceptor: Function to call before tool execution
-            post_interceptor: Function to call after tool execution
+            pre_callback: Function to call before tool execution
+            post_callback: Function to call after tool execution
         """
-        self.tool_manager.set_tool_interceptors(pre_interceptor, post_interceptor)
+        self.tool_manager.set_tool_callbacks(pre_callback, post_callback)
     
     def _call_claude(self, tools: List[Dict]) -> ResponseType:
         """
@@ -96,6 +97,9 @@ class Agent:
             
         Returns:
             Claude's response as a ResponseType
+            
+        Raises:
+            MaxTokensExceededException: If the response was truncated due to token limits
         """
         # Set tool_choice with disable_parallel_tool_use parameter
         tool_choice = None
@@ -149,6 +153,9 @@ class Agent:
             parent_message_id=parent_message_id
         )
         
+        # Check if token limit was reached
+        was_truncated = response.stop_reason == "max_tokens"
+        
         # Check if tool use is requested
         if response.stop_reason == "tool_use":
             # Extract text and tool use from response
@@ -168,16 +175,21 @@ class Agent:
                     input=tool_use.input,
                     id=tool_use.id,
                     message_id=message_id,
-                    preamble=text_content
+                    preamble=text_content.strip() if text_content else None
                 )
         
         # Regular text response
         text_content = extract_text_content(response.content)
         
+        # If the response was truncated due to token limits, raise an exception
+        if was_truncated:
+            raise MaxTokensExceededException(response_text=text_content)
+        
         return TextResponse(
             type="text",
             text=text_content,
-            message_id=message_id
+            message_id=message_id,
+            was_truncated=was_truncated
         )
     
     def process_prompt(self, prompt: str) -> str:
@@ -189,6 +201,10 @@ class Agent:
             
         Returns:
             Claude's response as a string
+            
+        Raises:
+            MaxTokensExceededException: If the response was truncated due to token limits
+            MaxRoundsExceededException: If the maximum number of tool execution rounds was reached
         """
         # Add user message to conversation
         self.messages.append({
@@ -206,20 +222,27 @@ class Agent:
         rounds = 0
         while response.type == "tool_use" and rounds < self.max_rounds:
             # Add assistant message with tool use
+            content_items = []
+            if response.preamble:
+                content_items.append({
+                    "type": "text",
+                    "text": response.preamble
+                })
+            
+            content_items.append({
+                "type": "tool_use",
+                "id": response.id,
+                "name": response.name,
+                "input": response.input
+            })
+            
             self.messages.append({
                 "role": "assistant",
-                "content": [
-                    {
-                        "type": "tool_use",
-                        "id": response.id,
-                        "name": response.name,
-                        "input": response.input
-                    }
-                ]
+                "content": content_items
             })
             
             # Execute the tool
-            tool_result = self.tool_manager.execute_tool(response.name, response.input)
+            tool_result = self.tool_manager.execute_tool(response.name, response.input, response.preamble)
             
             # Add user message with tool result
             self.messages.append({
@@ -234,6 +257,10 @@ class Agent:
             
             # Increment rounds
             rounds += 1
+        
+        # Check if we hit the max rounds limit
+        if rounds >= self.max_rounds:
+            raise MaxRoundsExceededException(response_text=response.text, rounds=rounds)
         
         # Add assistant message to conversation
         self.messages.append({
@@ -276,3 +303,43 @@ class Agent:
         """Reset the conversation history."""
         self.messages = []
         self.token_tracker.reset()
+        
+    def get_messages(self, filter_out_tools: bool = False) -> List[Dict]:
+        """
+        Get the current conversation messages.
+        
+        Args:
+            filter_out_tools: If True, removes messages related to tool calls or tool results
+        
+        Returns:
+            A copy of the conversation messages list
+        """
+        messages = self.messages.copy()
+        
+        if filter_out_tools:
+            filtered_messages = []
+            for message in messages:
+                # Check if this is a tool-related message
+                if isinstance(message.get("content"), list):
+                    is_tool_message = False
+                    for content_item in message["content"]:
+                        if isinstance(content_item, dict) and content_item.get("type") in ["tool_use", "tool_result"]:
+                            is_tool_message = True
+                            break
+                    
+                    if is_tool_message:
+                        continue
+                
+                filtered_messages.append(message)
+            return filtered_messages
+        
+        return messages
+    
+    def set_messages(self, messages: List[Dict]):
+        """
+        Set the conversation messages.
+        
+        Args:
+            messages: List of message dictionaries to set as the conversation history
+        """
+        self.messages = messages.copy()

@@ -3,7 +3,7 @@ from .tools.manager import ToolManager
 from .token_tracking import TokenTracker
 from .api.client import ApiClient
 from .api.models import ResponseType, ToolUseResponse, TextResponse
-from .tools.interceptors import create_logging_interceptors
+from .tools.callbacks import create_logging_callbacks
 from .utils.helpers import generate_message_id, format_tool_result
 
 __all__ = [
@@ -14,7 +14,7 @@ __all__ = [
     "ResponseType",
     "ToolUseResponse", 
     "TextResponse",
-    "create_logging_interceptors",
+    "create_logging_callbacks",
     "generate_message_id",
     "format_tool_result"
 ]

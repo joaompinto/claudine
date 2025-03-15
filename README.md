@@ -1,8 +1,8 @@
-# Claudine
+# 🤖 Claudine
 
 A Python wrapper for the Anthropic Claude API that simplifies tool use, token tracking, and agent functionality.
 
-## Installation
+## 📦 Installation
 
 ```bash
 # Using uv
@@ -12,16 +12,16 @@ uv pip install -e .
 uv pip install -e ".[dev]"
 ```
 
-## Features
+## ✨ Features
 
-- Easy integration with Claude 3 models
-- Tool registration and management
-- Token usage tracking and reporting
-- Cost information tracking
-- Support for tool interceptors
-- Simplified message handling
+- 🔌 Easy integration with Claude 3 models
+- 🛠️ Tool registration and management
+- 🔢 Token usage tracking and reporting
+- 💰 Cost information tracking
+- 📞 Support for tool callbacks
+- 💬 Simplified message handling
 
-## Quick Start
+## 🚀 Quick Start
 
 ```python
 from claudine import Agent
@@ -42,7 +42,7 @@ cost_info = agent.get_cost()
 print(f"Total cost: ${cost_info['total_cost'].total_cost:.6f} {cost_info['total_cost'].unit}")
 ```
 
-## Tool Usage
+## 🔧 Tool Usage
 
 ```python
 from claudine import Agent
@@ -62,7 +62,7 @@ response = agent.process_prompt("What's the weather in London?")
 print(response)
 ```
 
-## Text Editor Tool
+## 📝 Text Editor Tool
 
 Claudine supports the text editor tool for Claude, allowing it to view and edit text files:
 
@@ -76,15 +76,15 @@ agent = Agent(text_editor_tool=handle_editor_tool)
 ```
 
 The text editor tool supports the following commands:
-- `view`: View the contents of a file
-- `str_replace`: Replace text in a file
-- `create`: Create a new file
-- `insert`: Insert text at a specific position
-- `undo_edit`: Undo the last edit
+- 👁️ `view`: View the contents of a file
+- 🔄 `str_replace`: Replace text in a file
+- ✨ `create`: Create a new file
+- ➕ `insert`: Insert text at a specific position
+- ↩️ `undo_edit`: Undo the last edit
 
 For more information, see the [Anthropic documentation](https://docs.anthropic.com/en/docs/build-with-claude/tool-use/text-editor-tool).
 
-## Token Tracking
+## 🔢 Token Tracking
 
 Claudine provides detailed token usage information:
 
@@ -103,7 +103,7 @@ print(f"Tool output tokens: {token_info.tools_usage.output_tokens}")
 print(f"Total tokens: {token_info.total_usage.total_tokens}")
 ```
 
-## Debugging
+## 🐛 Debugging
 
 Claudine provides a debug mode to help you understand what's happening behind the scenes:
 
@@ -116,13 +116,13 @@ response = agent.process_prompt("Hello, Claude!")
 ```
 
 When debug mode is enabled, Claudine will print detailed information about the API requests being sent to Claude, including:
-- Message content
-- Tool definitions
-- Model parameters
+- 💬 Message content
+- 🛠️ Tool definitions
+- ⚙️ Model parameters
 
 This is particularly useful when debugging tool use and text editor interactions.
 
-## Cost Tracking
+## 💰 Cost Tracking
 
 Claudine also provides detailed cost information:
 
@@ -150,6 +150,6 @@ for tool_name, cost in cost_info['by_tool'].items():
     print(f"  Total cost: ${cost.total_cost:.6f} {cost.unit}")
 ```
 
-## License
+## 📄 License
 
 MIT

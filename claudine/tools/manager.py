@@ -1,7 +1,7 @@
 """
 Tool management functionality for Claude.
 Provides a system for registering, managing, and executing tools with Claude,
-including schema generation, interceptors, and execution handling.
+including schema generation, callbacks, and execution handling.
 """
 from typing import Dict, List, Optional, Callable, Any, Tuple, Union
 import inspect
@@ -16,8 +16,8 @@ class ToolManager:
     def __init__(self):
         """Initialize an empty tool manager."""
         self.tools = {}
-        self.pre_interceptor = None
-        self.post_interceptor = None
+        self.pre_tool_callback = None
+        self.post_tool_callback = None
         self.text_editor_tool = None
     
     def register_tools(self, tools: List[Callable]):
@@ -38,38 +38,42 @@ class ToolManager:
             if tool_name == "str_replace_editor":
                 self.text_editor_tool = tool
     
-    def set_tool_interceptors(self, pre_interceptor: Optional[Callable] = None, 
-                             post_interceptor: Optional[Callable] = None):
+    def set_tool_callbacks(self, pre_callback: Optional[Callable] = None, 
+                             post_callback: Optional[Callable] = None):
         """
-        Set interceptors for tool execution.
+        Set callbacks for tool execution.
         
         Args:
-            pre_interceptor: Function to call before tool execution.
-                             Must have signature (tool_name: str, tool_input: Dict[str, Any]) -> None
-            post_interceptor: Function to call after tool execution.
+            pre_callback: Function to call before tool execution.
+                             Must have signature (tool_name: str, tool_input: Dict[str, Any], preamble_text: str) -> None
+            post_callback: Function to call after tool execution.
                               Must have signature (tool_name: str, tool_input: Dict[str, Any], result: Any) -> Any
                               
         Raises:
-            ValueError: If the interceptors don't have the correct signature
+            ValueError: If the callbacks don't have the correct signature
         """
-        # Check pre_interceptor signature if provided
-        if pre_interceptor:
+        # Check pre_callback signature if provided
+        if pre_callback:
             import inspect
-            sig = inspect.signature(pre_interceptor)
-            params = list(sig.parameters.keys())
-            if len(params) != 2:
-                raise ValueError(f"Pre-interceptor must have exactly 2 parameters: (tool_name, tool_input). Got {len(params)} parameters: {params}")
-        
-        # Check post_interceptor signature if provided
-        if post_interceptor:
-            import inspect
-            sig = inspect.signature(post_interceptor)
+            sig = inspect.signature(pre_callback)
             params = list(sig.parameters.keys())
             if len(params) != 3:
-                raise ValueError(f"Post-interceptor must have exactly 3 parameters: (tool_name, tool_input, result). Got {len(params)} parameters: {params}")
+                raise ValueError(f"Pre-callback must have exactly 3 parameters: (tool_name, tool_input, preamble_text). Got {len(params)} parameters: {params}")
+            if params[0] != "tool_name" or params[1] != "tool_input" or params[2] != "preamble_text":
+                raise ValueError(f"Pre-callback must have parameters named 'tool_name', 'tool_input', and 'preamble_text' in that order. Got: {params}")
         
-        self.pre_interceptor = pre_interceptor
-        self.post_interceptor = post_interceptor
+        # Check post_callback signature if provided
+        if post_callback:
+            import inspect
+            sig = inspect.signature(post_callback)
+            params = list(sig.parameters.keys())
+            if len(params) != 3:
+                raise ValueError(f"Post-callback must have exactly 3 parameters: (tool_name, tool_input, result). Got {len(params)} parameters: {params}")
+            if params[0] != "tool_name" or params[1] != "tool_input" or params[2] != "result":
+                raise ValueError(f"Post-callback must have parameters named 'tool_name', 'tool_input', and 'result' in that order. Got: {params}")
+        
+        self.pre_tool_callback = pre_callback
+        self.post_tool_callback = post_callback
     
     def get_tool_schemas(self) -> List[Dict]:
         """
@@ -94,13 +98,14 @@ class ToolManager:
         
         return schemas
     
-    def execute_tool(self, tool_name: str, tool_input: Dict[str, Any]) -> Union[str, Tuple[str, bool]]:
+    def execute_tool(self, tool_name: str, tool_input: Dict[str, Any], preamble_text: str = "") -> Union[str, Tuple[str, bool]]:
         """
         Execute a tool with the given input.
         
         Args:
             tool_name: Name of the tool to execute
             tool_input: Input parameters for the tool
+            preamble_text: Any text generated before the tool call
             
         Returns:
             Tool execution result as a string or a tuple of (content, is_error)
@@ -115,16 +120,16 @@ class ToolManager:
         if not tool_func:
             return (f"Error: Tool '{tool_name}' not found", True)
         
-        # Call pre-interceptor if available
-        if self.pre_interceptor:
-            self.pre_interceptor(tool_name, tool_input)
+        # Call pre-callback if available
+        if self.pre_tool_callback:
+            self.pre_tool_callback(tool_name, tool_input, preamble_text)
         
         # Execute the tool
         result = tool_func(**tool_input)
         
-        # Call post-interceptor if available
-        if self.post_interceptor:
-            result = self.post_interceptor(tool_name, tool_input, result)
+        # Call post-callback if available
+        if self.post_tool_callback:
+            result = self.post_tool_callback(tool_name, tool_input, result)
         
         # Handle tuple case for error reporting
         if isinstance(result, tuple) and len(result) == 2 and isinstance(result[1], bool):

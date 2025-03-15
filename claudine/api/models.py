@@ -24,6 +24,7 @@ class TextResponse:
     type: str = "text"
     text: str = ""
     message_id: str = ""
+    was_truncated: bool = False
 
 @dataclass
 class TokenPricing:

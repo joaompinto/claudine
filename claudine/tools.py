@@ -10,14 +10,14 @@ class ToolManager:
         """Initialize an empty tool manager."""
         self.registered_tools = {}
         
-        # Default interceptors
-        self.pre_tool_interceptor = self._default_pre_tool_interceptor
-        self.post_tool_interceptor = self._default_post_tool_interceptor
+        # Default callbacks
+        self.pre_tool_callback = self._default_pre_tool_callback
+        self.post_tool_callback = self._default_post_tool_callback
     
-    def _default_pre_tool_interceptor(self, tool_name: str, tool_input: Dict[str, Any], 
-                                    preamble_text: str = "") -> Dict[str, Any]:
+    def _default_pre_tool_callback(self, tool_name: str, tool_input: Dict[str, Any], 
+                                    preamble_text: str) -> Dict[str, Any]:
         """
-        Default interceptor called before a tool is executed.
+        Default callback called before a tool is executed.
         
         Args:
             tool_name: Name of the tool being called
@@ -29,37 +29,34 @@ class ToolManager:
         """
         return tool_input
     
-    def _default_post_tool_interceptor(self, tool_name: str, tool_input: Dict[str, Any], 
-                                     result: Any, error: Optional[Exception] = None,
-                                     preamble_text: str = "") -> Any:
+    def _default_post_tool_callback(self, tool_name: str, tool_input: Dict[str, Any], 
+                                     result: Any) -> Any:
         """
-        Default interceptor called after a tool is executed.
+        Default callback called after a tool is executed.
         
         Args:
             tool_name: Name of the tool that was called
             tool_input: Input parameters that were passed to the tool
-            result: Result returned by the tool (None if there was an error)
-            error: Exception that occurred during execution (None if successful)
-            preamble_text: Any text Claude generated before the tool call
+            result: Result returned by the tool
             
         Returns:
             Possibly modified result
         """
         return result
     
-    def set_tool_interceptors(self, pre_interceptor: Optional[Callable] = None, 
-                            post_interceptor: Optional[Callable] = None):
+    def set_tool_callbacks(self, pre_callback: Optional[Callable] = None, 
+                            post_callback: Optional[Callable] = None):
         """
-        Set custom interceptors for tool calls.
+        Set custom callbacks for tool calls.
         
         Args:
-            pre_interceptor: Function to call before executing a tool
-            post_interceptor: Function to call after executing a tool
+            pre_callback: Function to call before executing a tool
+            post_callback: Function to call after executing a tool
         """
-        if pre_interceptor:
-            self.pre_tool_interceptor = pre_interceptor
-        if post_interceptor:
-            self.post_tool_interceptor = post_interceptor
+        if pre_callback:
+            self.pre_tool_callback = pre_callback
+        if post_callback:
+            self.post_tool_callback = post_callback
     
     def register_tool(self, func: Callable, name: Optional[str] = None, description: Optional[str] = None):
         """
@@ -217,7 +214,7 @@ class ToolManager:
         """
         return list(self.registered_tools.keys())
     
-    def execute_tool(self, tool_name: str, tool_input: Dict[str, Any], preamble_text: str = "") -> Any:
+    def execute_tool(self, tool_name: str, tool_input: Dict[str, Any], preamble_text: str) -> Any:
         """
         Execute a registered tool with the given input.
         
@@ -238,8 +235,8 @@ class ToolManager:
         tool_info = self.registered_tools[tool_name]
         func = tool_info["function"]
         
-        # Apply pre-execution interceptor
-        modified_input = self.pre_tool_interceptor(tool_name, tool_input, preamble_text)
+        # Apply pre-execution callback
+        modified_input = self.pre_tool_callback(tool_name, tool_input, preamble_text)
         
         # Execute the tool
         error = None
@@ -249,5 +246,5 @@ class ToolManager:
         except Exception as e:
             error = e
             
-        # Apply post-execution interceptor
-        return self.post_tool_interceptor(tool_name, modified_input, result, error, preamble_text)
+        # Apply post-execution callback
+        return self.post_tool_callback(tool_name, modified_input, result)

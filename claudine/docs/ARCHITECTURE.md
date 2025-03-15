@@ -23,7 +23,7 @@ claudine/
 │   ├── __init__.py
 │   ├── manager.py        # Tool registration and execution
 │   ├── schema.py         # Tool schema generation
-│   └── interceptors.py   # Tool interceptor functionality
+│   └── callbacks.py      # Tool callback functionality
 ├── token_tracking.py     # Token tracking (already separate)
 └── utils/
     ├── __init__.py
@@ -55,8 +55,8 @@ claudine/
 - Generates JSON schemas for tools
 - Validates tool inputs and outputs
 
-### tools/interceptors.py
-- Implements tool interceptor functionality
+### tools/callbacks.py
+- Implements tool callback functionality
 - Provides pre/post execution hooks
 
 ### token_tracking.py

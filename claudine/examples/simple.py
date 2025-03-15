@@ -19,51 +19,43 @@ def main():
     Always explain your reasoning clearly and concisely.
     """
     
-    # Define tool interceptors
-    def custom_pre_interceptor(tool_name, tool_input, preamble_text=""):
+    # Define tool callbacks
+    def custom_pre_callback(tool_name, tool_input, preamble_text):
         print(f" About to execute: {tool_name}")
         print(f" Input parameters: {tool_input}")
-        
-        if preamble_text:
-            print(f" Claude said before tool use: {preamble_text.strip()}")
+        print(f" Preamble text: '{preamble_text if preamble_text else ''}'")
         
         # You can modify the tool input here if needed
         # For example, add defaults or transform inputs
         return tool_input
     
-    def custom_post_interceptor(tool_name, tool_input, result, error=None, preamble_text=""):
-        if error:
-            print(f" Tool execution failed: {tool_name}")
-            print(f" Error: {str(error)}")
-        else:
-            print(f" Tool executed successfully: {tool_name}")
-            print(f" Result: {result}")
-            
-            # You can modify the result here if needed
-            # For example, format it differently or add metadata
+    def custom_post_callback(tool_name, tool_input, result):
+        print(f" Tool executed successfully: {tool_name}")
+        print(f" Result: {result}")
+        
+        # You can modify the result here if needed
+        # For example, format it differently or add metadata
         return result
     
-    # Initialize Agent with model parameters, tools, and interceptors
+    # Initialize Agent with model parameters, tools, and callbacks
     agent = Agent(
         instructions=instructions,
         tools=tools,
-        tool_interceptors=(custom_pre_interceptor, custom_post_interceptor)
+        tool_callbacks=(custom_pre_callback, custom_post_callback)
     )
     
-    # Example usage with a single prompt
-    prompt = "What time is it now, and what's the weather in San Francisco?"
-    response = agent.process_prompt(prompt)
+    # Process user prompts
+    prompts = [
+        "What time is it now, and what's the weather in San Francisco?",
+        "Can you calculate 25 * 18 for me?"
+    ]
     
-    print(f"User: {prompt}")
-    print(f"Claude: {response}")
-    
-    # Example of continuing the conversation
-    prompt = "Can you calculate 25 * 18 for me?"
-    response = agent.process_prompt(prompt)
-    
-    print(f"\nUser: {prompt}")
-    print(f"Claude: {response}")
-    
+    for prompt in prompts:
+        print(f"User: {prompt}")
+        response = agent.process_prompt(prompt)
+        print(f"Claude: {response}")
+        print()
+        
     # Reset conversation history
     agent.reset()
     
