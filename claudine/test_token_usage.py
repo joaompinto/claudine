@@ -1,5 +1,5 @@
-from claudine.api.models import TokenUsage, TokenUsageInfo
-from claudine.token_tracking import TokenTracker
+from claudine.tokens.models import TokenUsage, TokenUsageInfo
+from claudine.tokens.tracking import TokenTracker
 
 # Create a token tracker and add some test messages
 tracker = TokenTracker()

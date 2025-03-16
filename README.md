@@ -26,8 +26,8 @@ from claudine import Agent
 # Initialize the agent
 agent = Agent()
 
-# Process a prompt
-response = agent.process_prompt("Write a short poem about programming.")
+# Query Claude with a prompt
+response = agent.query("Write a short poem about programming.")
 print(response)
 
 # Get token usage information
@@ -54,8 +54,8 @@ agent = Agent(
     tools=[search_web]
 )
 
-# Process a prompt that might use tools
-response = agent.process_prompt("What's the weather in London?")
+# Query Claude with a prompt that might use tools
+response = agent.query("What's the weather in London?")
 print(response)
 ```
 
@@ -100,6 +100,28 @@ print(f"Tool output tokens: {token_info.tools_usage.output_tokens}")
 print(f"Total tokens: {token_info.total_usage.total_tokens}")
 ```
 
+## 🧠 Cache Support
+
+Claudine supports Claude's cache functionality, which can significantly reduce token costs for repeated or similar prompts:
+
+```python
+# Initialize agent
+agent = Agent()
+
+# First call will create a cache
+response1 = agent.query("What is the capital of France?")
+
+# Second call with the same prompt will use the cache
+response2 = agent.query("What is the capital of France?")
+
+# Get token usage with cache information
+token_info = agent.get_token_usage()
+print(f"Cache creation tokens: {token_info.total_usage.cache_creation_input_tokens}")
+print(f"Cache read tokens: {token_info.total_usage.cache_read_input_tokens}")
+```
+
+Cache usage is automatically tracked and reflected in token usage and cost calculations. Using the cache can result in significant cost savings for repeated queries.
+
 ## 🐛 Debugging
 
 Claudine provides a debug mode to help you understand what's happening behind the scenes:
@@ -108,20 +130,21 @@ Claudine provides a debug mode to help you understand what's happening behind th
 # Initialize agent with debug mode
 agent = Agent(debug_mode=True)
 
-# Process a prompt
-response = agent.process_prompt("Hello, Claude!")
+# Query Claude with a prompt
+response = agent.query("Hello, Claude!")
 ```
 
 When debug mode is enabled, Claudine will print detailed information about the API requests being sent to Claude, including:
 - 💬 Message content
 - 🛠️ Tool definitions
 - ⚙️ Model parameters
+- 🔢 Token usage and cache metrics
 
-This is particularly useful when debugging tool use and text editor interactions.
+This is particularly useful when debugging tool use, cache behavior, and text editor interactions.
 
 ## 💰 Cost Tracking
 
-Claudine also provides detailed cost information:
+Claudine provides detailed cost information, including cache-related costs:
 
 ```python
 cost_info = agent.get_cost()
@@ -136,6 +159,10 @@ print(f"Tool input cost: ${cost_info['tools_cost'].input_cost:.6f} {cost_info['t
 print(f"Tool output cost: ${cost_info['tools_cost'].output_cost:.6f} {cost_info['tools_cost'].unit}")
 print(f"Tool total cost: ${cost_info['tools_cost'].total_cost:.6f} {cost_info['tools_cost'].unit}")
 
+# Cache costs
+print(f"Cache creation cost: ${cost_info['total_cost'].cache_creation_cost:.6f} {cost_info['total_cost'].unit}")
+print(f"Cache read cost: ${cost_info['total_cost'].cache_read_cost:.6f} {cost_info['total_cost'].unit}")
+
 # Total cost
 print(f"Total cost: ${cost_info['total_cost'].total_cost:.6f} {cost_info['total_cost'].unit}")
 
@@ -146,6 +173,8 @@ for tool_name, cost in cost_info['by_tool'].items():
     print(f"  Output cost: ${cost.output_cost:.6f} {cost.unit}")
     print(f"  Total cost: ${cost.total_cost:.6f} {cost.unit}")
 ```
+
+The cost tracking takes into account Claude's cache pricing model, where cache creation and cache read operations are charged at different rates than standard input tokens.
 
 ## 📄 License
 

@@ -50,21 +50,21 @@ def main():
     
     # First prompt that uses a tool
     first_prompt = "Generate a random number for me."
-    first_response = agent.process_prompt(first_prompt)
+    first_response = agent.query(first_prompt)
     
     print(f"User: {first_prompt}")
     print(f"Claude: {first_response}")
     
     # Second prompt that should reference the result of the first tool
     second_prompt = "Is the number you just generated a prime number?"
-    second_response = agent.process_prompt(second_prompt)
+    second_response = agent.query(second_prompt)
     
     print(f"\nUser: {second_prompt}")
     print(f"Claude: {second_response}")
     
     # Third prompt to test memory of both previous tool results
     third_prompt = "What time is it now? And remind me what was the random number you generated and whether it was prime."
-    third_response = agent.process_prompt(third_prompt)
+    third_response = agent.query(third_prompt)
     
     print(f"\nUser: {third_prompt}")
     print(f"Claude: {third_response}")

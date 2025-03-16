@@ -28,21 +28,21 @@ def main():
     
     # First question
     first_prompt = "Generate a random 4-digit number for me to use as a PIN code."
-    first_response = agent.process_prompt(first_prompt)
+    first_response = agent.query(first_prompt)
     
     print(f"User: {first_prompt}")
     print(f"Claude: {first_response}")
     
     # Second question that references the first answer
     second_prompt = "What was the PIN code you just gave me? Also, tell me what would happen if I added 1 to that number."
-    second_response = agent.process_prompt(second_prompt)
+    second_response = agent.query(second_prompt)
     
     print(f"\nUser: {second_prompt}")
     print(f"Claude: {second_response}")
     
     # Third question to further test memory
     third_prompt = "Can you remind me what the original PIN was and what number you calculated when adding 1 to it?"
-    third_response = agent.process_prompt(third_prompt)
+    third_response = agent.query(third_prompt)
     
     print(f"\nUser: {third_prompt}")
     print(f"Claude: {third_response}")

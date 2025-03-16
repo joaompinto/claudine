@@ -6,13 +6,19 @@ class ToolManager:
     Manages tool registration, schema generation, and execution for the Agent.
     """
     
-    def __init__(self):
-        """Initialize an empty tool manager."""
+    def __init__(self, pre_callback: Optional[Callable] = None, post_callback: Optional[Callable] = None):
+        """
+        Initialize a tool manager.
+        
+        Args:
+            pre_callback: Function to call before executing a tool
+            post_callback: Function to call after executing a tool
+        """
         self.registered_tools = {}
         
-        # Default callbacks
-        self.pre_tool_callback = self._default_pre_tool_callback
-        self.post_tool_callback = self._default_post_tool_callback
+        # Set callbacks
+        self.pre_tool_callback = pre_callback if pre_callback else self._default_pre_tool_callback
+        self.post_tool_callback = post_callback if post_callback else self._default_post_tool_callback
     
     def _default_pre_tool_callback(self, tool_name: str, tool_input: Dict[str, Any], 
                                     preamble_text: str) -> Dict[str, Any]:
@@ -44,19 +50,7 @@ class ToolManager:
         """
         return result
     
-    def set_tool_callbacks(self, pre_callback: Optional[Callable] = None, 
-                            post_callback: Optional[Callable] = None):
-        """
-        Set custom callbacks for tool calls.
-        
-        Args:
-            pre_callback: Function to call before executing a tool
-            post_callback: Function to call after executing a tool
-        """
-        if pre_callback:
-            self.pre_tool_callback = pre_callback
-        if post_callback:
-            self.post_tool_callback = post_callback
+
     
     def register_tool(self, func: Callable, name: Optional[str] = None, description: Optional[str] = None):
         """

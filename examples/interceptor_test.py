@@ -5,11 +5,11 @@ from claudine import Agent, create_logging_callbacks
 
 def main():
     # These callbacks have the correct signature
-    pre_callback, post_callback = create_logging_callbacks()
+    callbacks = create_logging_callbacks()
     
     # This will work fine
     agent = Agent(
-        tool_callbacks=(pre_callback, post_callback)
+        callbacks=callbacks
     )
     print("Successfully set up agent with valid callbacks")
     
@@ -19,7 +19,7 @@ def main():
     
     try:
         agent = Agent(
-            tool_callbacks=(invalid_pre_callback, post_callback)
+            callbacks={"pre_tool": invalid_pre_callback, "post_tool": callbacks["post_tool"]}
         )
         print("This should not be printed")
     except ValueError as e:
@@ -32,7 +32,7 @@ def main():
     
     try:
         agent = Agent(
-            tool_callbacks=(pre_callback, invalid_post_callback)
+            callbacks={"pre_tool": callbacks["pre_tool"], "post_tool": invalid_post_callback}
         )
         print("This should not be printed")
     except ValueError as e:

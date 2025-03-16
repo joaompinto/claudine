@@ -41,13 +41,13 @@ def main():
     print("FIRST PROMPT (TOOL USE)")
     print("=" * 50)
     first_prompt = "What's the weather like in San Francisco?"
-    first_response = agent.process_prompt(first_prompt)
+    first_response = agent.query(first_prompt)
     
     print(f"User: {first_prompt}")
     print(f"Claude: {first_response}")
     
     # Get token usage information
-    token_info = agent.get_token_usage()
+    token_info = agent.get_tokens()
     
     print("\nToken Usage Information:")
     print(f"Text input tokens: {token_info.text_usage.input_tokens}")
@@ -58,7 +58,7 @@ def main():
     print(f"Tool total tokens: {token_info.tools_usage.total_tokens}")
     
     # Get cost information
-    cost_info = agent.get_cost()
+    cost_info = agent.get_token_cost()
     
     print("\nCost Information:")
     print(f"Text input cost: ${cost_info['text_cost'].input_cost:.6f} {cost_info['text_cost'].unit}")
@@ -74,13 +74,13 @@ def main():
     print("SECOND PROMPT (TOOL USE)")
     print("=" * 50)
     second_prompt = "Calculate 123 * 456"
-    second_response = agent.process_prompt(second_prompt)
+    second_response = agent.query(second_prompt)
     
     print(f"User: {second_prompt}")
     print(f"Claude: {second_response}")
     
     # Get updated token usage information
-    token_info = agent.get_token_usage()
+    token_info = agent.get_tokens()
     
     # Print token usage by tool
     print("\nToken Usage By Tool:")
@@ -91,7 +91,7 @@ def main():
         print(f"  Total tokens: {usage.total_tokens}")
     
     # Get updated cost information
-    cost_info = agent.get_cost()
+    cost_info = agent.get_token_cost()
     
     # Print cost by tool
     print("\nCost By Tool:")

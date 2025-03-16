@@ -5,21 +5,21 @@ from typing import Dict, List, Optional, Any
 import anthropic
 import json
 
-class ApiClient:
+class ClaudeClient:
     """
     Wrapper for the Anthropic API client.
     """
     
-    def __init__(self, api_key: Optional[str] = None, debug_mode: bool = False):
+    def __init__(self, api_key: Optional[str] = None, verbose: bool = False):
         """
         Initialize the API client.
         
         Args:
             api_key: Anthropic API key. If None, will try to get from environment variable.
-            debug_mode: If True, print debug information about API calls.
+            verbose: If True, print detailed information about API calls.
         """
         self.client = anthropic.Anthropic(api_key=api_key)
-        self.debug_mode = debug_mode
+        self.verbose = verbose
     
     def create_message(self, 
                       model: str,
@@ -65,7 +65,7 @@ class ApiClient:
                 api_params["tool_choice"] = tool_choice
         
         # Debug mode: print API call parameters
-        if self.debug_mode:
+        if self.verbose:
             print("\n===== DEBUG: API REQUEST =====")
             debug_params = api_params.copy()
             # Format messages for better readability
@@ -96,4 +96,23 @@ class ApiClient:
             print("===== END DEBUG =====\n")
         
         # Make the API call
-        return self.client.messages.create(**api_params)
+        response = self.client.messages.create(**api_params)
+        
+        # Debug mode: print response content blocks
+        if self.verbose:
+            print("\n===== DEBUG: API RESPONSE =====")
+            print(f"Response ID: {response.id}")
+            print(f"Stop reason: {response.stop_reason}")
+            print(f"Content blocks: {len(response.content)} items")
+            for i, block in enumerate(response.content):
+                print(f"  Block {i+1}:")
+                print(f"    Type: {block.type}")
+                if block.type == "text":
+                    print(f"    Text: {block.text[:100]}{'...' if len(block.text) > 100 else ''}")
+                    print(f"    Text length: {len(block.text)}")
+                elif block.type == "tool_use":
+                    print(f"    Tool: {block.name}")
+                    print(f"    Input: {block.input}")
+            print("===== END DEBUG =====\n")
+        
+        return response

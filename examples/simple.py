@@ -20,16 +20,15 @@ def main():
     """
     
     # Define tool callbacks
-    def custom_pre_callback(tool_name, tool_input, preamble_text):
+    def custom_pre_tool_callback(tool_name, tool_input):
         print(f" About to execute: {tool_name}")
         print(f" Input parameters: {tool_input}")
-        print(f" Preamble text: '{preamble_text if preamble_text else ''}'")
         
         # You can modify the tool input here if needed
         # For example, add defaults or transform inputs
         return tool_input
     
-    def custom_post_callback(tool_name, tool_input, result):
+    def custom_post_tool_callback(tool_name, tool_input, result):
         print(f" Tool executed successfully: {tool_name}")
         print(f" Result: {result}")
         
@@ -41,7 +40,10 @@ def main():
     agent = Agent(
         instructions=instructions,
         tools=tools,
-        tool_callbacks=(custom_pre_callback, custom_post_callback)
+        callbacks={
+            "pre_tool": custom_pre_tool_callback,
+            "post_tool": custom_post_tool_callback
+        }
     )
     
     # Process user prompts
@@ -52,7 +54,7 @@ def main():
     
     for prompt in prompts:
         print(f"User: {prompt}")
-        response = agent.process_prompt(prompt)
+        response = agent.query(prompt)
         print(f"Claude: {response}")
         print()
         

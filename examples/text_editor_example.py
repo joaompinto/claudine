@@ -32,18 +32,18 @@ def main():
         max_tokens=1024,
         temperature=0.7,
         text_editor_tool=handle_editor_tool,
-        debug_mode=True  # Enable debug mode to see messages sent to Claude
+        verbose=True  # Enable verbose mode to see messages sent to Claude
     )
     
     # Example prompt that might trigger the text editor tool
-    response = agent.process_prompt(
+    response = agent.query(
         "I have an error in file.py. The function add(a, b) is subtracting instead of adding. "
         "Can you check the file and fix it?"
     )
     
     # Get and print token usage and cost information
-    token_usage = agent.get_token_usage()
-    cost_info = agent.get_cost()
+    token_usage = agent.get_tokens()
+    cost_info = agent.get_token_cost()
     
     print("\nToken Usage and Cost Information:")
     print(f"Total cost: {cost_info.format_total_cost()}")

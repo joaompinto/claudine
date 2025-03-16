@@ -55,7 +55,7 @@ def main():
     )
     
     # Process a prompt that will likely use tools
-    response = agent.process_prompt(
+    response = agent.query(
         "What's the weather in New York? Also, what is 1234 * 5678?"
     )
     
@@ -65,7 +65,7 @@ def main():
     print("\n" + "-" * 50 + "\n")
     
     # Get token usage information
-    token_info = agent.get_token_usage()
+    token_info = agent.get_tokens()
     
     print("Token Usage Information:")
     print(f"Text input tokens: {token_info.text_usage.input_tokens}")
@@ -84,7 +84,7 @@ def main():
     print(f"Total tokens: {total.total_tokens}")
     
     # Get cost information
-    cost_info = agent.get_cost()
+    cost_info = agent.get_token_cost()
     
     print("\n" + "-" * 50 + "\n")
     print("Cost Information:")

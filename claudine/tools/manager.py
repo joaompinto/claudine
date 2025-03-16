@@ -13,12 +13,56 @@ class ToolManager:
     Manages tool registration, schema generation, and execution.
     """
     
-    def __init__(self):
-        """Initialize an empty tool manager."""
+    def __init__(self, pre_callback: Optional[Callable] = None, post_callback: Optional[Callable] = None, text_callback: Optional[Callable] = None):
+        """
+        Initialize a tool manager.
+        
+        Args:
+            pre_callback: Function to call before tool execution.
+                          Must have signature (tool_name: str, tool_input: Dict[str, Any]) -> None
+            post_callback: Function to call after tool execution.
+                           Must have signature (tool_name: str, tool_input: Dict[str, Any], result: Any) -> Any
+            text_callback: Function to call when a text block is received.
+                           Must have signature (text: str) -> None
+        """
         self.tools = {}
+        self.text_editor_tool = None
+        self.bash_tool = None
+        
+        # Initialize callbacks
         self.pre_tool_callback = None
         self.post_tool_callback = None
-        self.text_editor_tool = None
+        self.text_callback = None
+        
+        # Check and set pre_callback if provided
+        if pre_callback:
+            sig = inspect.signature(pre_callback)
+            params = list(sig.parameters.keys())
+            if len(params) != 2:
+                raise ValueError(f"Pre-tool callback must have exactly 2 parameters: (tool_name, tool_input). Got {len(params)} parameters: {params}")
+            if params[0] != "tool_name" or params[1] != "tool_input":
+                raise ValueError(f"Pre-tool callback must have parameters named 'tool_name' and 'tool_input' in that order. Got: {params}")
+            self.pre_tool_callback = pre_callback
+        
+        # Check and set post_callback if provided
+        if post_callback:
+            sig = inspect.signature(post_callback)
+            params = list(sig.parameters.keys())
+            if len(params) != 3:
+                raise ValueError(f"Post-tool callback must have exactly 3 parameters: (tool_name, tool_input, result). Got {len(params)} parameters: {params}")
+            if params[0] != "tool_name" or params[1] != "tool_input" or params[2] != "result":
+                raise ValueError(f"Post-tool callback must have parameters named 'tool_name', 'tool_input', and 'result' in that order. Got: {params}")
+            self.post_tool_callback = post_callback
+            
+        # Check and set text_callback if provided
+        if text_callback:
+            sig = inspect.signature(text_callback)
+            params = list(sig.parameters.keys())
+            if len(params) != 1:
+                raise ValueError(f"Text callback must have exactly 1 parameter: (text). Got {len(params)} parameters: {params}")
+            if params[0] != "text":
+                raise ValueError(f"Text callback must have a parameter named 'text'. Got: {params}")
+            self.text_callback = text_callback
     
     def register_tools(self, tools: List[Callable]):
         """
@@ -34,46 +78,11 @@ class ToolManager:
             # Store the function
             self.tools[tool_name] = tool
             
-            # Check if this is a text editor tool
+            # Check if this is a text editor tool or bash tool
             if tool_name == "str_replace_editor":
                 self.text_editor_tool = tool
-    
-    def set_tool_callbacks(self, pre_callback: Optional[Callable] = None, 
-                             post_callback: Optional[Callable] = None):
-        """
-        Set callbacks for tool execution.
-        
-        Args:
-            pre_callback: Function to call before tool execution.
-                             Must have signature (tool_name: str, tool_input: Dict[str, Any], preamble_text: str) -> None
-            post_callback: Function to call after tool execution.
-                              Must have signature (tool_name: str, tool_input: Dict[str, Any], result: Any) -> Any
-                              
-        Raises:
-            ValueError: If the callbacks don't have the correct signature
-        """
-        # Check pre_callback signature if provided
-        if pre_callback:
-            import inspect
-            sig = inspect.signature(pre_callback)
-            params = list(sig.parameters.keys())
-            if len(params) != 3:
-                raise ValueError(f"Pre-callback must have exactly 3 parameters: (tool_name, tool_input, preamble_text). Got {len(params)} parameters: {params}")
-            if params[0] != "tool_name" or params[1] != "tool_input" or params[2] != "preamble_text":
-                raise ValueError(f"Pre-callback must have parameters named 'tool_name', 'tool_input', and 'preamble_text' in that order. Got: {params}")
-        
-        # Check post_callback signature if provided
-        if post_callback:
-            import inspect
-            sig = inspect.signature(post_callback)
-            params = list(sig.parameters.keys())
-            if len(params) != 3:
-                raise ValueError(f"Post-callback must have exactly 3 parameters: (tool_name, tool_input, result). Got {len(params)} parameters: {params}")
-            if params[0] != "tool_name" or params[1] != "tool_input" or params[2] != "result":
-                raise ValueError(f"Post-callback must have parameters named 'tool_name', 'tool_input', and 'result' in that order. Got: {params}")
-        
-        self.pre_tool_callback = pre_callback
-        self.post_tool_callback = post_callback
+            elif tool_name == "bash":
+                self.bash_tool = tool
     
     def get_tool_schemas(self) -> List[Dict]:
         """
@@ -85,12 +94,18 @@ class ToolManager:
         schemas = []
         
         for name, func in self.tools.items():
-            # Special handling for text editor tool
+            # Special handling for text editor tool and bash tool
             if name == "str_replace_editor" and self.text_editor_tool:
                 # For text editor, only include name and type
                 schemas.append({
                     "name": "str_replace_editor",
                     "type": "text_editor_20250124"
+                })
+            elif name == "bash" and self.bash_tool:
+                # For bash tool, only include name and type
+                schemas.append({
+                    "name": "bash",
+                    "type": "bash_20250124"
                 })
             else:
                 schema = generate_tool_schema(func, name)
@@ -98,21 +113,22 @@ class ToolManager:
         
         return schemas
     
-    def execute_tool(self, tool_name: str, tool_input: Dict[str, Any], preamble_text: str = "") -> Union[str, Tuple[str, bool]]:
+    def execute_tool(self, tool_name: str, tool_input: Dict[str, Any]) -> Union[str, Tuple[str, bool]]:
         """
         Execute a tool with the given input.
         
         Args:
             tool_name: Name of the tool to execute
             tool_input: Input parameters for the tool
-            preamble_text: Any text generated before the tool call
             
         Returns:
             Tool execution result as a string or a tuple of (content, is_error)
         """
-        # Check if this is a text editor tool request
+        # Check if this is a text editor or bash tool request
         if tool_name == "str_replace_editor" and self.text_editor_tool:
             tool_func = self.text_editor_tool
+        elif tool_name == "bash" and self.bash_tool:
+            tool_func = self.bash_tool
         else:
             # Get the tool function
             tool_func = self.tools.get(tool_name)
@@ -120,14 +136,14 @@ class ToolManager:
         if not tool_func:
             return (f"Error: Tool '{tool_name}' not found", True)
         
-        # Call pre-callback if available
+        # Call pre-tool callback if available
         if self.pre_tool_callback:
-            self.pre_tool_callback(tool_name, tool_input, preamble_text)
+            self.pre_tool_callback(tool_name, tool_input)
         
         # Execute the tool
         result = tool_func(**tool_input)
         
-        # Call post-callback if available
+        # Call post-tool callback if available
         if self.post_tool_callback:
             result = self.post_tool_callback(tool_name, tool_input, result)
         
@@ -148,5 +164,5 @@ class ToolManager:
                 result = json.dumps(result)
             else:
                 result = str(result)
-        
+                
         return result

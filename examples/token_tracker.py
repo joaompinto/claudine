@@ -11,27 +11,31 @@ def main():
     
     # Make a simple API call
     print("Making API call...")
-    response = agent.process_prompt("What is token counting and why is it important?")
+    response = agent.query("What is token counting and why is it important?")
     
     # Print the response
     print("\nClaude's response:")
     print(response)
     
     # Get token usage information
-    token_info = agent.get_token_usage()
+    token_info = agent.get_tokens()
     
     # Print token usage information
     print("\nToken Usage Information:")
     print(f"Input tokens: {token_info.text_usage.input_tokens}")
     print(f"Output tokens: {token_info.text_usage.output_tokens}")
     print(f"Total tokens: {token_info.text_usage.total_tokens}")
+    print(f"Cache creation tokens: {token_info.text_usage.cache_creation_input_tokens}")
+    print(f"Cache read tokens: {token_info.text_usage.cache_read_input_tokens}")
     
     # Get cost information
-    cost_info = agent.get_cost()
+    cost_info = agent.get_token_cost()
     
     print("\nCost Information:")
     print(f"Input cost: {cost_info.format_input_cost()}")
     print(f"Output cost: {cost_info.format_output_cost()}")
+    print(f"Cache creation cost: ${cost_info.cache_creation_cost:.6f}")
+    print(f"Cache read cost: ${cost_info.cache_read_cost:.6f}")
     print(f"Total cost: {cost_info.format_total_cost()}")
     
     return 0

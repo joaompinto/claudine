@@ -6,7 +6,7 @@ class ClaudineException(Exception):
     """Base exception for all claudine exceptions."""
     pass
 
-class MaxTokensExceededException(ClaudineException):
+class TokenLimitExceededException(ClaudineException):
     """
     Exception raised when the response from Claude is truncated 
     because it reached the maximum token limit.
@@ -17,7 +17,7 @@ class MaxTokensExceededException(ClaudineException):
         self.response_text = response_text
         super().__init__(self.message)
 
-class MaxRoundsExceededException(ClaudineException):
+class ToolRoundsLimitExceededException(ClaudineException):
     """
     Exception raised when the maximum number of tool execution rounds is reached.
     """

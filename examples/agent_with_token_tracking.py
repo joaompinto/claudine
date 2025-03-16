@@ -13,14 +13,14 @@ def main():
     prompt = "What is token counting in AI language models?"
     print(f"User: {prompt}")
     
-    response = agent.process_prompt(prompt)
+    response = agent.query(prompt)
     
     # Print the response
     print(f"\nClaude's response:")
     print(response)
     
     # Get token usage information
-    token_info = agent.get_token_usage()
+    token_info = agent.get_tokens()
     
     # Print token usage information
     print("\nToken Usage Information:")
@@ -29,25 +29,25 @@ def main():
     print(f"Total tokens: {token_info.text_usage.total_tokens}")
     
     # Get cost information
-    cost_info = agent.get_cost()
+    cost_info = agent.get_token_cost()
     
     print("\nCost Information:")
-    print(f"Input cost: {cost_info.format_input_cost()}")
-    print(f"Output cost: {cost_info.format_output_cost()}")
-    print(f"Total cost: {cost_info.format_total_cost()}")
+    print(f"Input cost: ${cost_info.input_cost:.4f}")
+    print(f"Output cost: ${cost_info.output_cost:.4f}")
+    print(f"Total cost: ${cost_info.total_cost:.4f}")
     
     # Make another API call
     second_prompt = "How can developers optimize token usage in their applications?"
     print(f"\nUser: {second_prompt}")
     
-    second_response = agent.process_prompt(second_prompt)
+    second_response = agent.query(second_prompt)
     
     # Print the response
     print(f"\nClaude's response:")
     print(second_response)
     
     # Get updated token usage information
-    token_info = agent.get_token_usage()
+    token_info = agent.get_tokens()
     
     # Print updated token usage information
     print("\nUpdated Token Usage Information:")
@@ -56,10 +56,10 @@ def main():
     print(f"Total tokens: {token_info.total_usage.total_tokens}")
     
     # Get updated cost information
-    cost_info = agent.get_cost()
+    cost_info = agent.get_token_cost()
     
     print("\nUpdated Cost Information:")
-    print(f"Total cost: {cost_info.format_total_cost()}")
+    print(f"Total cost: ${cost_info.total_cost:.4f}")
     
     return 0
 
