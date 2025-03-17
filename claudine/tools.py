@@ -20,13 +20,13 @@ class ToolManager:
         self.pre_tool_callback = pre_callback if pre_callback else self._default_pre_tool_callback
         self.post_tool_callback = post_callback if post_callback else self._default_post_tool_callback
     
-    def _default_pre_tool_callback(self, tool_name: str, tool_input: Dict[str, Any], 
+    def _default_pre_tool_callback(self, tool_func: Callable, tool_input: Dict[str, Any], 
                                     preamble_text: str) -> Dict[str, Any]:
         """
         Default callback called before a tool is executed.
         
         Args:
-            tool_name: Name of the tool being called
+            tool_func: Function of the tool being called
             tool_input: Input parameters for the tool
             preamble_text: Any text Claude generated before the tool call
             
@@ -35,13 +35,13 @@ class ToolManager:
         """
         return tool_input
     
-    def _default_post_tool_callback(self, tool_name: str, tool_input: Dict[str, Any], 
+    def _default_post_tool_callback(self, tool_func: Callable, tool_input: Dict[str, Any], 
                                      result: Any) -> Any:
         """
         Default callback called after a tool is executed.
         
         Args:
-            tool_name: Name of the tool that was called
+            tool_func: Function of the tool that was called
             tool_input: Input parameters that were passed to the tool
             result: Result returned by the tool
             
@@ -230,7 +230,7 @@ class ToolManager:
         func = tool_info["function"]
         
         # Apply pre-execution callback
-        modified_input = self.pre_tool_callback(tool_name, tool_input, preamble_text)
+        modified_input = self.pre_tool_callback(func, tool_input, preamble_text)
         
         # Execute the tool
         error = None
@@ -241,4 +241,4 @@ class ToolManager:
             error = e
             
         # Apply post-execution callback
-        return self.post_tool_callback(tool_name, modified_input, result)
+        return self.post_tool_callback(func, modified_input, result)

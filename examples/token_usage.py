@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from claudine import Agent
+from claudine.agent import Agent
 import sys
 
 def main():
@@ -8,8 +8,16 @@ def main():
     after making calls to the Claudine Agent.
     """
     
-    # Initialize Agent
-    agent = Agent(max_tokens=1000, temperature=0.7)
+    # Initialize Agent with config_params
+    agent = Agent(
+        max_tokens=1000, 
+        config_params={
+            "temperature": 0.7,
+            "top_p": 0.9,
+            "top_k": 50
+        },
+        verbose=True
+    )
     
     # Simple message to the API
     response = agent.query("Write a short poem about programming.")

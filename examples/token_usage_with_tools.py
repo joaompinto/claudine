@@ -50,7 +50,7 @@ def main():
     # Initialize Agent with tools
     agent = Agent(
         max_tokens=1000, 
-        temperature=0.7,
+        config_params={"temperature": 0.7},
         tools=[weather_tool, calculator]
     )
     

@@ -18,7 +18,7 @@ def main():
     verbose = args.verbose
     
     # Initialize Agent with increased max_tokens and verbose mode based on argument
-    agent = Agent(temperature=0.7, verbose=verbose, max_tokens=4096)
+    agent = Agent(config_params={"temperature": 0.7}, verbose=verbose, max_tokens=4096)
     
     if verbose:
         print("Verbose mode enabled - API calls and token tracking details will be shown")

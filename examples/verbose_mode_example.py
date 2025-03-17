@@ -14,7 +14,17 @@ def main():
     verbose = "--verbose" in sys.argv
     
     # Initialize Agent with verbose mode based on argument
-    agent = Agent(temperature=0.7, verbose=verbose)
+    # Using the new config_params approach
+    agent = Agent(
+        config_params={
+            "temperature": 0.7,
+            "top_p": 0.95
+        }, 
+        verbose=verbose
+    )
+    
+    # Alternatively, you could use the backward-compatible approach:
+    # agent = Agent(config_params={"temperature": 0.7}, verbose=verbose)
     
     if verbose:
         print("Verbose mode enabled - API calls and token tracking details will be shown")

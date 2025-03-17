@@ -5,11 +5,13 @@ from claudine import Agent, create_logging_callbacks
 
 def main():
     # Define our own callbacks with the correct signatures
-    def pre_tool_callback(tool_name, tool_input):
+    def pre_tool_callback(tool_func, tool_input):
+        tool_name = tool_func.__name__
         print(f" About to execute: {tool_name}")
         print(f" Input parameters: {tool_input}")
     
-    def post_tool_callback(tool_name, tool_input, result):
+    def post_tool_callback(tool_func, tool_input, result):
+        tool_name = tool_func.__name__
         print(f" Tool executed successfully: {tool_name}")
         print(f" Result: {result}")
         return result
@@ -32,8 +34,8 @@ def main():
     print("Successfully set up agent with valid callbacks")
     
     # Invalid pre-callback (wrong number of parameters)
-    def invalid_pre_callback(tool_name):
-        print(f"Invalid pre-callback called for: {tool_name}")
+    def invalid_pre_callback(tool_func):
+        print(f"Invalid pre-callback called for: {tool_func.__name__}")
     
     try:
         agent = Agent(
@@ -45,8 +47,8 @@ def main():
         print(f"Caught expected error: {e}")
     
     # Invalid post-callback (wrong number of parameters)
-    def invalid_post_callback(tool_name, tool_input):
-        print(f"Invalid post-callback called for: {tool_name}")
+    def invalid_post_callback(tool_func, tool_input):
+        print(f"Invalid post-callback called for: {tool_func.__name__}")
         return "Modified result"
     
     try:

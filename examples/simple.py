@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from claudine import Agent
+from claudine.agent import Agent
 import sys
 import os
 from datetime import datetime
@@ -12,15 +12,16 @@ def main():
     # Define tools
     tools = [get_time, get_weather, search_info, calculate]
     
-    # Define instructions for the agent
-    instructions = """
+    # Define system prompt for the agent
+    system_prompt = """
     You are a helpful AI assistant named Claude. Your primary goal is to assist the user with 
     information, calculations, and general questions. When using tools, be precise and efficient.
     Always explain your reasoning clearly and concisely.
     """
     
     # Define tool callbacks
-    def custom_pre_tool_callback(tool_name, tool_input):
+    def custom_pre_tool_callback(tool_func, tool_input):
+        tool_name = tool_func.__name__
         print(f" About to execute: {tool_name}")
         print(f" Input parameters: {tool_input}")
         
@@ -28,7 +29,8 @@ def main():
         # For example, add defaults or transform inputs
         return tool_input
     
-    def custom_post_tool_callback(tool_name, tool_input, result):
+    def custom_post_tool_callback(tool_func, tool_input, result):
+        tool_name = tool_func.__name__
         print(f" Tool executed successfully: {tool_name}")
         print(f" Result: {result}")
         
@@ -36,14 +38,21 @@ def main():
         # For example, format it differently or add metadata
         return result
     
+    # Define text callback
+    def custom_text_callback(text):
+        print(f" Received text response: {text[:50]}...")
+    
     # Initialize Agent with model parameters, tools, and callbacks
     agent = Agent(
-        instructions=instructions,
+        system_prompt=system_prompt,
         tools=tools,
         callbacks={
             "pre_tool": custom_pre_tool_callback,
-            "post_tool": custom_post_tool_callback
-        }
+            "post_tool": custom_post_tool_callback,
+            "text": custom_text_callback
+        },
+        max_tokens=1024,
+        verbose=True
     )
     
     # Process user prompts
@@ -60,6 +69,15 @@ def main():
         
     # Reset conversation history
     agent.reset()
+    
+    # Print token usage information
+    token_usage = agent.get_tokens()
+    print(f"Total input tokens: {token_usage.total_usage.input_tokens}")
+    print(f"Total output tokens: {token_usage.total_usage.output_tokens}")
+    
+    # Print token cost information
+    token_cost = agent.get_token_cost()
+    print(f"Total cost: ${token_cost.total_cost:.6f}")
     
     return 0
 

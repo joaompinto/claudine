@@ -39,9 +39,7 @@ class ToolManager:
             sig = inspect.signature(pre_callback)
             params = list(sig.parameters.keys())
             if len(params) != 2:
-                raise ValueError(f"Pre-tool callback must have exactly 2 parameters: (tool_name, tool_input). Got {len(params)} parameters: {params}")
-            if params[0] != "tool_name" or params[1] != "tool_input":
-                raise ValueError(f"Pre-tool callback must have parameters named 'tool_name' and 'tool_input' in that order. Got: {params}")
+                raise ValueError(f"Pre-tool callback must have exactly 2 parameters: (tool_func, tool_input). Got {len(params)} parameters: {params}")
             self.pre_tool_callback = pre_callback
         
         # Check and set post_callback if provided
@@ -49,9 +47,7 @@ class ToolManager:
             sig = inspect.signature(post_callback)
             params = list(sig.parameters.keys())
             if len(params) != 3:
-                raise ValueError(f"Post-tool callback must have exactly 3 parameters: (tool_name, tool_input, result). Got {len(params)} parameters: {params}")
-            if params[0] != "tool_name" or params[1] != "tool_input" or params[2] != "result":
-                raise ValueError(f"Post-tool callback must have parameters named 'tool_name', 'tool_input', and 'result' in that order. Got: {params}")
+                raise ValueError(f"Post-tool callback must have exactly 3 parameters: (tool_func, tool_input, result). Got {len(params)} parameters: {params}")
             self.post_tool_callback = post_callback
             
         # Check and set text_callback if provided
@@ -138,14 +134,14 @@ class ToolManager:
         
         # Call pre-tool callback if available
         if self.pre_tool_callback:
-            self.pre_tool_callback(tool_name, tool_input)
+            self.pre_tool_callback(tool_func, tool_input)
         
         # Execute the tool
         result = tool_func(**tool_input)
         
         # Call post-tool callback if available
         if self.post_tool_callback:
-            result = self.post_tool_callback(tool_name, tool_input, result)
+            result = self.post_tool_callback(tool_func, tool_input, result)
         
         # Handle tuple case for error reporting
         if isinstance(result, tuple) and len(result) == 2 and isinstance(result[1], bool):

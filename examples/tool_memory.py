@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from claudine import Agent
+from claudine.agent import Agent
 import sys
 import os
 from datetime import datetime
@@ -38,15 +38,15 @@ def main():
     # Define tools list
     tools = [generate_random_number, check_if_prime, get_current_time]
     
-    # Define instructions for the agent
-    instructions = """
+    # Define system prompt for the agent
+    system_prompt = """
     You are a helpful AI assistant. Your primary goal is to assist the user with 
     information and general questions. When using tools, remember the results
     and be able to reference them in subsequent responses.
     """
     
     # Initialize Agent
-    agent = Agent(instructions=instructions, tools=tools)
+    agent = Agent(system_prompt=system_prompt, tools=tools, verbose=True)
     
     # First prompt that uses a tool
     first_prompt = "Generate a random number for me."

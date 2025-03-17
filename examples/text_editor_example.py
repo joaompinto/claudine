@@ -30,8 +30,9 @@ def main():
     agent = Agent(
         api_key=api_key,
         max_tokens=1024,
-        temperature=0.7,
+        config_params={"temperature": 0.7},
         text_editor_tool=handle_editor_tool,
+        system_prompt="You are a helpful assistant that can edit text files. When asked to check or fix code, use the text editor tool.",
         verbose=True  # Enable verbose mode to see messages sent to Claude
     )
     

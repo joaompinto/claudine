@@ -7,7 +7,7 @@ def main():
     Example that demonstrates token usage and cost tracking with the Agent class.
     """
     # Initialize Agent
-    agent = Agent(max_tokens=1000, temperature=0.7)
+    agent = Agent(max_tokens=1000, config_params={"temperature": 0.7})
     
     # Make a simple API call
     prompt = "What is token counting in AI language models?"

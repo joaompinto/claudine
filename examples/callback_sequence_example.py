@@ -2,7 +2,7 @@
 Example showing the sequence of callbacks during a conversation with multiple tool calls.
 """
 import os
-from typing import Dict, Any
+from typing import Dict, Any, Callable
 from datetime import datetime
 
 from claudine import Agent
@@ -41,17 +41,19 @@ def text_callback(text: str):
     print(f"\n[TEXT #{text_callbacks}] Received text: {text[:100]}{'...' if len(text) > 100 else ''}")
     print(f"[TEXT] Text length: {len(text)}")
 
-def pre_tool_callback(tool_name: str, tool_input: Dict[str, Any]):
+def pre_tool_callback(tool_func: Callable, tool_input: Dict[str, Any]):
     """Callback before tool execution."""
     global pre_tool_callbacks
     pre_tool_callbacks += 1
+    tool_name = tool_func.__name__
     print(f"\n[PRE-TOOL #{pre_tool_callbacks}] About to execute: {tool_name}")
     print(f"[PRE-TOOL] Input parameters: {tool_input}")
 
-def post_tool_callback(tool_name: str, tool_input: Dict[str, Any], result: Any):
+def post_tool_callback(tool_func: Callable, tool_input: Dict[str, Any], result: Any):
     """Callback after tool execution."""
     global post_tool_callbacks
     post_tool_callbacks += 1
+    tool_name = tool_func.__name__
     print(f"[POST-TOOL #{post_tool_callbacks}] Tool executed: {tool_name}")
     print(f"[POST-TOOL] Result: {result}")
     return result

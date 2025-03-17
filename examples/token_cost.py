@@ -9,7 +9,7 @@ def main():
     """
     
     # Initialize Agent
-    agent = Agent(max_tokens=1000, temperature=0.7)
+    agent = Agent(max_tokens=1000, config_params={"temperature": 0.7})
     
     # Simple message to the API
     response = agent.query("Write a short poem about programming.")
@@ -33,11 +33,11 @@ def main():
     cost_info = agent.get_token_cost()
     
     print("\nCost Information:")
-    print(f"Input cost: {cost_info.format_input_cost()} {cost_info.unit}")
-    print(f"Output cost: {cost_info.format_output_cost()} {cost_info.unit}")
+    print(f"Input cost: ${cost_info.input_cost:.6f} {cost_info.unit}")
+    print(f"Output cost: ${cost_info.output_cost:.6f} {cost_info.unit}")
     print(f"Cache creation cost: ${cost_info.cache_creation_cost:.6f} {cost_info.unit}")
     print(f"Cache read cost: ${cost_info.cache_read_cost:.6f} {cost_info.unit}")
-    print(f"Total cost: {cost_info.format_total_cost()} {cost_info.unit}")
+    print(f"Total cost: ${cost_info.total_cost:.6f} {cost_info.unit}")
     
     # Example with a longer prompt
     print("\n" + "-" * 50 + "\n")
@@ -64,11 +64,11 @@ def main():
     cost_info = agent.get_token_cost()
     
     print("\nUpdated Cost Information:")
-    print(f"Input cost: {cost_info.format_input_cost()} {cost_info.unit}")
-    print(f"Output cost: {cost_info.format_output_cost()} {cost_info.unit}")
+    print(f"Input cost: ${cost_info.input_cost:.6f} {cost_info.unit}")
+    print(f"Output cost: ${cost_info.output_cost:.6f} {cost_info.unit}")
     print(f"Cache creation cost: ${cost_info.cache_creation_cost:.6f} {cost_info.unit}")
     print(f"Cache read cost: ${cost_info.cache_read_cost:.6f} {cost_info.unit}")
-    print(f"Total cost: {cost_info.format_total_cost()} {cost_info.unit}")
+    print(f"Total cost: ${cost_info.total_cost:.6f} {cost_info.unit}")
     
     return 0
 

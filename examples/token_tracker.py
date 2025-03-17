@@ -7,7 +7,7 @@ def main():
     Example that demonstrates how to track token usage and cost with the Claudine Agent.
     """
     # Initialize Agent
-    agent = Agent(max_tokens=100, temperature=0.7)
+    agent = Agent(max_tokens=100, config_params={"temperature": 0.7})
     
     # Make a simple API call
     print("Making API call...")

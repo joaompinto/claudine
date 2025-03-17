@@ -32,7 +32,7 @@ def main():
     # Initialize Agent with tools
     agent = Agent(
         max_tokens=1000, 
-        temperature=0.7,
+        config_params={"temperature": 0.7},
         tools=[get_weather, calculate]
     )
     
@@ -61,13 +61,11 @@ def main():
     cost_info = agent.get_token_cost()
     
     print("\nCost Information:")
-    print(f"Text input cost: ${cost_info['text_cost'].input_cost:.6f} {cost_info['text_cost'].unit}")
-    print(f"Text output cost: ${cost_info['text_cost'].output_cost:.6f} {cost_info['text_cost'].unit}")
-    print(f"Text total cost: ${cost_info['text_cost'].total_cost:.6f} {cost_info['text_cost'].unit}")
-    print(f"Tool input cost: ${cost_info['tools_cost'].input_cost:.6f} {cost_info['tools_cost'].unit}")
-    print(f"Tool output cost: ${cost_info['tools_cost'].output_cost:.6f} {cost_info['tools_cost'].unit}")
-    print(f"Tool total cost: ${cost_info['tools_cost'].total_cost:.6f} {cost_info['tools_cost'].unit}")
-    print(f"Total cost: ${cost_info['total_cost'].total_cost:.6f} {cost_info['total_cost'].unit}")
+    print(f"Input cost: ${cost_info.input_cost:.6f} {cost_info.unit}")
+    print(f"Output cost: ${cost_info.output_cost:.6f} {cost_info.unit}")
+    print(f"Cache creation cost: ${cost_info.cache_creation_cost:.6f} {cost_info.unit}")
+    print(f"Cache read cost: ${cost_info.cache_read_cost:.6f} {cost_info.unit}")
+    print(f"Total cost: ${cost_info.total_cost:.6f} {cost_info.unit}")
     
     # Second prompt that will use another tool
     print("=" * 50)
@@ -93,20 +91,12 @@ def main():
     # Get updated cost information
     cost_info = agent.get_token_cost()
     
-    # Print cost by tool
-    print("\nCost By Tool:")
-    for tool_name, cost in cost_info['by_tool'].items():
-        print(f"Tool: {tool_name}")
-        print(f"  Input cost: ${cost.input_cost:.6f} {cost.unit}")
-        print(f"  Output cost: ${cost.output_cost:.6f} {cost.unit}")
-        print(f"  Total cost: ${cost.total_cost:.6f} {cost.unit}")
-    
     # Print total token usage and cost
     print("\nTotal Token Usage and Cost:")
     print(f"Total input tokens: {token_info.total_usage.input_tokens}")
     print(f"Total output tokens: {token_info.total_usage.output_tokens}")
     print(f"Total tokens: {token_info.total_usage.total_tokens}")
-    print(f"Total cost: ${cost_info['total_cost'].total_cost:.6f} {cost_info['total_cost'].unit}")
+    print(f"Total cost: ${cost_info.total_cost:.6f} {cost_info.unit}")
     
     return 0
 

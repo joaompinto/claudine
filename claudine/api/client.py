@@ -25,7 +25,7 @@ class ClaudeClient:
                       model: str,
                       messages: List[Dict[str, Any]],
                       max_tokens: int = 1024,
-                      temperature: float = 0.7,
+                      config_params: Optional[Dict[str, Any]] = None,
                       system: Optional[str] = None,
                       tools: Optional[List[Dict]] = None,
                       tool_choice: Optional[Dict] = None) -> anthropic.types.Message:
@@ -36,7 +36,7 @@ class ClaudeClient:
             model: Claude model to use
             messages: List of messages in the conversation
             max_tokens: Maximum number of tokens to generate
-            temperature: Temperature for generation
+            config_params: Dictionary of configuration parameters for the model (top_k, top_p, etc.)
             system: System prompt to guide the model's behavior
             tools: List of tool schemas
             tool_choice: Tool choice configuration
@@ -48,9 +48,13 @@ class ClaudeClient:
         api_params = {
             "model": model,
             "max_tokens": max_tokens,
-            "temperature": temperature,
             "messages": messages
         }
+        
+        # Add config parameters if provided
+        if config_params:
+            for key, value in config_params.items():
+                api_params[key] = value
         
         # Add system prompt if provided
         if system:

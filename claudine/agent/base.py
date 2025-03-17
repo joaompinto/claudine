@@ -28,7 +28,7 @@ class Agent:
     """
     
     def __init__(self, api_key: Optional[str] = None, 
-                max_tokens: int = 1024, temperature: float = 0.7,
+                max_tokens: int = 1024, config_params: Optional[Dict[str, Any]] = None,
                 max_tool_rounds: int = 30, system_prompt: Optional[str] = None,
                 tools: Optional[List[Callable]] = None,
                 callbacks: Optional[Dict[str, Callable]] = None,
@@ -43,7 +43,7 @@ class Agent:
         Args:
             api_key: Anthropic API key
             max_tokens: Maximum number of tokens to generate
-            temperature: Temperature for generation
+            config_params: Dictionary of configuration parameters for the model (top_k, top_p, etc.)
             max_tool_rounds: Maximum number of rounds for tool use
             system_prompt: Instructions to guide the model's behavior (used as system prompt)
             tools: List of functions to register as tools
@@ -62,7 +62,10 @@ class Agent:
         # Initialize conversation state
         self.messages = []
         self.max_tokens = max_tokens
-        self.temperature = temperature
+        
+        # Handle config parameters
+        self.config_params = config_params or {}
+            
         self.max_tool_rounds = max_tool_rounds
         self.system = system_prompt
         
@@ -128,7 +131,7 @@ class Agent:
             print("\n[DEBUG] Calling Claude API")
             print(f"  Model: {DEFAULT_MODEL}")
             print(f"  Max tokens: {self.max_tokens}")
-            print(f"  Temperature: {self.temperature}")
+            print(f"  Config params: {self.config_params}")
             print(f"  Number of messages: {len(processed_messages)}")
             print(f"  Tools enabled: {bool(tools)}")
             if tools:
@@ -141,7 +144,7 @@ class Agent:
             model=DEFAULT_MODEL,
             messages=processed_messages,
             max_tokens=self.max_tokens,
-            temperature=self.temperature,
+            config_params=self.config_params,
             system=self.system,
             tools=tools,
             tool_choice=tool_choice
@@ -286,7 +289,9 @@ class Agent:
         
         # Check if we hit the max rounds limit
         if rounds >= self.max_tool_rounds:
-            raise ToolRoundsLimitExceededException(response_text=response.text, rounds=rounds)
+            # Check the response type before accessing text attribute
+            response_text = response.text if hasattr(response, 'text') else ""
+            raise ToolRoundsLimitExceededException(response_text=response_text, rounds=rounds)
         
         # Return the response text
         return response.text
