@@ -2,11 +2,6 @@
 
 A Python wrapper for the Anthropic Claude API that simplifies tool use, token tracking, and agent functionality.
 
-## 🆕 Recent Changes
-
-
-
-
 ## 📦 Installation
 
 ```bash
@@ -16,7 +11,7 @@ pip install claudine
 
 ## ✨ Features
 
-- 🔌 Easy integration with Claude 3 models
+- 🔌 Easy integration with Claude API
 - 🛠️ Tool registration and management
 - 🔢 Token usage tracking and reporting
 - 💰 Cost information tracking
@@ -24,7 +19,7 @@ pip install claudine
 - 💬 Simplified message handling
 - 🖥️ Built-in support for bash tool
 - 🔄 Cache support for efficient token usage
-- ⚙️ Flexible model configuration parameters
+- ⚙️ Flexible configuration parameters
 
 ## 🚀 Quick Start
 
@@ -270,9 +265,9 @@ for tool_name, cost in cost_info.by_tool.items():
     print(f"  Total cost: ${cost.total_cost:.6f} {cost.unit}")
 ```
 
-The cost tracking is based on the current Claude API pricing model (as of 2024):
-- Input tokens: $3.00 per million tokens for Claude 3 Sonnet
-- Output tokens: $15.00 per million tokens for Claude 3 Sonnet
+The cost tracking is based on the current Claude API pricing model (as of 2025):
+- Input tokens: $3.00 per million tokens
+- Output tokens: $15.00 per million tokens
 - Cache creation: 125% of the base input token price
 - Cache read: 10% of the base input token price
 

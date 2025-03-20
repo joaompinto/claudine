@@ -2,6 +2,21 @@
 
 All notable changes to the Claudine project will be documented in this file.
 
+## [0.3.0] - 2025-04-01
+
+### Added
+- Support for Claude Sonnet 3.7 model (claude-3-7-sonnet-20250219)
+- Flexible model configuration parameters
+
+### Updated
+- README with specific information about supported models
+- Improved API for accessing token and cost information with direct attribute access
+- Removed built-in text_editor_wrapper in favor of allowing users to implement their own
+- Removed model selection methods (set_model) in favor of configuration at initialization
+
+### Fixed
+- Documentation clarity around caching behavior and token usage
+
 ## [0.2.0] - 2025-03-16
 
 ### Added
