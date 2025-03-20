@@ -2,6 +2,11 @@
 
 A Python wrapper for the Anthropic Claude API that simplifies tool use, token tracking, and agent functionality.
 
+## 🆕 Recent Changes
+
+
+
+
 ## 📦 Installation
 
 ```bash
@@ -19,14 +24,15 @@ pip install claudine
 - 💬 Simplified message handling
 - 🖥️ Built-in support for bash tool
 - 🔄 Cache support for efficient token usage
+- ⚙️ Flexible model configuration parameters
 
 ## 🚀 Quick Start
 
 ```python
 from claudine import Agent
 
-# Initialize the agent
-agent = Agent(max_tokens=1000)
+# Initialize the agent with configuration parameters
+agent = Agent(system_prompt="You are a helpful assistant that can answer questions.")
 
 # Query Claude with a prompt
 response = agent.query("Write a short poem about programming.")
@@ -64,7 +70,7 @@ print(response)
 
 ## 📝 Text Editor Tool
 
-Claudine supports the text editor tool for Claude, allowing it to view and edit text files:
+Claudine supports the text editor tool for Claude, allowing it to view and edit text files. You can implement your own text editor tool handler and pass it to the Agent:
 
 ```python
 def handle_editor_tool(command, **kwargs):
@@ -83,6 +89,8 @@ The text editor tool supports the following commands:
 - ↩️ `undo_edit`: Undo the last edit
 
 For more information, see the [Anthropic documentation](https://docs.anthropic.com/en/docs/build-with-claude/tool-use/text-editor-tool).
+
+Note: The built-in text_editor_wrapper has been removed in favor of allowing users to implement their own text editor tool handlers.
 
 ## 🖥️ Bash Tool
 
@@ -148,7 +156,7 @@ agent = Agent()
 response1 = agent.query("What is the capital of France?")
 
 # Second call with the same prompt will use the cache
-# This is an illustrative (but not accurate) example, because in fact caching is only perfomed when the input is >1024 tokens
+# Note: Caching is only performed when the input is >1024 tokens
 response2 = agent.query("What is the capital of France?")
 
 # Get token usage with cache information
@@ -169,6 +177,8 @@ Cache usage is automatically tracked and reflected in token usage and cost calcu
 - Cache reads cost only 10% of the standard input token price
 - The `cache_delta` field shows your savings from using the cache
 
+The API for accessing token and cost information has been improved with direct attribute access instead of dictionary access.
+
 ## 🐛 Debugging
 
 Claudine provides a verbose mode to help you understand what's happening behind the scenes:
@@ -187,7 +197,7 @@ When verbose mode is enabled, Claudine will print detailed information about the
 - ⚙️ Model parameters
 - 🔢 Token usage and cache metrics
 
-This is particularly useful when debugging tool use, cache behavior, and text editor interactions.
+This is particularly useful when debugging tool use, cache behavior, and tool interactions. The previous `debug_mode` parameter has been renamed to `verbose` for clarity.
 
 ## ⚙️ Configuration Parameters
 
@@ -230,7 +240,7 @@ agent.reset()
 
 ## 💰 Cost Tracking
 
-Claudine provides detailed cost information, including cache-related costs:
+Claudine provides detailed cost information, including cache-related costs. The API has been updated to use direct attribute access instead of dictionary access:
 
 ```python
 cost_info = agent.get_token_cost()

@@ -5,13 +5,13 @@ This module provides tools for tracking token usage across
 conversations, including separate tracking for text and tool interactions.
 """
 
-from typing import Dict, Optional, Union
+from typing import Dict, Optional, Union, Tuple
 from .models import TokenUsage, TokenUsageInfo, TokenCost
 from .pricing import MODEL_PRICING, DEFAULT_MODEL, get_model_pricing
 
 class TokenManager:
     """
-    Manages token usage and costs for Claude API calls.
+    Manages token usage, costs, and file operations for Claude API calls.
     """
     
     def __init__(self, model: str = DEFAULT_MODEL, verbose: bool = False):
@@ -231,14 +231,7 @@ class TokenManager:
             unit=pricing.input_tokens.unit
         )
     
-    def set_model(self, model: str):
-        """
-        Set the model to use for pricing calculations.
-        
-        Args:
-            model: Model identifier
-        """
-        self.model = model
+
     
     def reset(self):
         """Reset all token usage data."""

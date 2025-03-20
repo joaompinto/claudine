@@ -314,16 +314,6 @@ class Agent:
         """
         return self.token_manager.get_cost()
     
-    def set_model(self, model: str):
-        """
-        Set the model to use for the agent and update token tracker.
-        
-        Args:
-            model: The model name
-        """
-        self.model = model
-        self.token_manager.set_model(model)
-    
     def reset(self):
         """Reset the conversation history."""
         self.messages = []
